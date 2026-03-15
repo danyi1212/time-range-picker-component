@@ -10,6 +10,42 @@ import { Clock, CalendarDays, Timer, Code } from "lucide-react";
 
 export default function TimeRangePickerDemo() {
   const [selectedRange, setSelectedRange] = React.useState<TimeRange | null>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <main className="min-h-screen bg-background p-8">
+        <div className="mx-auto max-w-2xl space-y-8">
+          <div className="space-y-2 text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-balance">
+              Natural Language Time Range Picker
+            </h1>
+            <p className="text-muted-foreground text-pretty">
+              Type natural language or select from presets. Supports date ranges, time ranges, and relative periods.
+            </p>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="size-5" />
+                Select Time Range
+              </CardTitle>
+              <CardDescription>
+                Try typing "past 3 hours", "Mar 3 - Mar 13", "14:00 - 16:30", or select a preset
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-10 rounded-md border bg-background" />
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background p-8">
