@@ -44,7 +44,6 @@ export function TimeRangePicker({
   const [previewRange, setPreviewRange] = React.useState<TimeRange | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [isInitialClick, setIsInitialClick] = React.useState(true);
 
   const use24Hour = clockFormat === "24h";
 
@@ -115,16 +114,19 @@ export function TimeRangePicker({
     }
   };
 
-  const handleFocus = () => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     // When focusing, if there's a value, populate the input for editing
     if (value && !inputValue) {
-      setInputValue(formatRangeDisplay(value, use24Hour));
+      const displayText = formatRangeDisplay(value, use24Hour);
+      setInputValue(displayText);
+      // Move cursor to end after setting value
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(displayText.length, displayText.length);
+        }
+      });
     }
-    // Delay opening the popover slightly to avoid race condition
-    setTimeout(() => {
-      setOpen(true);
-      setIsInitialClick(false);
-    }, 0);
+    setOpen(true);
   };
 
   const handleBlur = (e: React.FocusEvent) => {
@@ -150,7 +152,6 @@ export function TimeRangePicker({
   React.useEffect(() => {
     if (!open) {
       setPreviewRange(null);
-      setIsInitialClick(true);
     }
   }, [open]);
 
@@ -165,12 +166,12 @@ export function TimeRangePicker({
             <input
               ref={inputRef}
               type="text"
-              value={inputValue || (value ? formatRangeDisplay(value, use24Hour) : "")}
+              value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder={placeholder}
+              placeholder={value ? formatRangeDisplay(value, use24Hour) : placeholder}
               className={cn(
                 "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
                 "file:border-0 file:bg-transparent file:text-sm file:font-medium",
@@ -178,7 +179,7 @@ export function TimeRangePicker({
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 "pl-9 pr-24",
-                value && !inputValue && "text-foreground"
+                value && !inputValue && "placeholder:text-foreground"
               )}
             />
             {value && (
