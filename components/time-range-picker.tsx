@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Clock, Calendar, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -22,6 +21,7 @@ import {
   formatDuration,
   formatRangeDisplay,
   getPresets,
+  ClockFormat,
 } from "@/lib/time-range";
 
 interface TimeRangePickerProps {
@@ -29,6 +29,7 @@ interface TimeRangePickerProps {
   onChange?: (range: TimeRange | null) => void;
   placeholder?: string;
   className?: string;
+  clockFormat?: ClockFormat;
 }
 
 export function TimeRangePicker({
@@ -36,11 +37,16 @@ export function TimeRangePicker({
   onChange,
   placeholder = "Search time range...",
   className,
+  clockFormat = "24h",
 }: TimeRangePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
   const [previewRange, setPreviewRange] = React.useState<TimeRange | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isInitialClick, setIsInitialClick] = React.useState(true);
+
+  const use24Hour = clockFormat === "24h";
 
   const filteredPresets = React.useMemo(
     () => getFilteredPresets(inputValue),
@@ -53,6 +59,13 @@ export function TimeRangePicker({
   }, [inputValue]);
 
   const displayRange = previewRange || value;
+
+  // Get display text for the input
+  const getDisplayText = (): string => {
+    if (inputValue) return inputValue;
+    if (value) return formatRangeDisplay(value, use24Hour);
+    return "";
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -86,6 +99,7 @@ export function TimeRangePicker({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     onChange?.(null);
     setInputValue("");
     setPreviewRange(null);
@@ -97,34 +111,74 @@ export function TimeRangePicker({
     } else if (e.key === "Escape") {
       setOpen(false);
       setPreviewRange(null);
+      inputRef.current?.blur();
     }
+  };
+
+  const handleFocus = () => {
+    // When focusing, if there's a value, populate the input for editing
+    if (value && !inputValue) {
+      setInputValue(formatRangeDisplay(value, use24Hour));
+    }
+    // Delay opening the popover slightly to avoid race condition
+    setTimeout(() => {
+      setOpen(true);
+      setIsInitialClick(false);
+    }, 0);
+  };
+
+  const handleBlur = (e: React.FocusEvent) => {
+    // Don't close if clicking within the popover
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (containerRef.current?.contains(relatedTarget)) {
+      return;
+    }
+    // Small delay to allow click events to process
+    setTimeout(() => {
+      if (!containerRef.current?.contains(document.activeElement)) {
+        // If we have a valid parsed result and user blurs, apply it
+        if (parsedFromInput && inputValue) {
+          onChange?.(parsedFromInput);
+        }
+        setInputValue("");
+        setPreviewRange(null);
+      }
+    }, 150);
   };
 
   // Reset preview when closing
   React.useEffect(() => {
     if (!open) {
       setPreviewRange(null);
+      setIsInitialClick(true);
     }
   }, [open]);
 
   return (
-    <div className={cn("relative", className)}>
+    <div ref={containerRef} className={cn("relative", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
               <Clock className="size-4" />
             </div>
-            <Input
+            <input
               ref={inputRef}
-              value={inputValue}
+              type="text"
+              value={inputValue || (value ? formatRangeDisplay(value, use24Hour) : "")}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              onFocus={() => setOpen(true)}
-              placeholder={value ? formatRangeDisplay(value) : placeholder}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              placeholder={placeholder}
               className={cn(
+                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+                "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+                "placeholder:text-muted-foreground",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "disabled:cursor-not-allowed disabled:opacity-50",
                 "pl-9 pr-24",
-                value && !inputValue && "text-foreground placeholder:text-foreground"
+                value && !inputValue && "text-foreground"
               )}
             />
             {value && (
@@ -137,6 +191,8 @@ export function TimeRangePicker({
                   size="icon"
                   className="size-5 text-muted-foreground hover:text-foreground"
                   onClick={handleClear}
+                  onMouseDown={(e) => e.preventDefault()}
+                  tabIndex={-1}
                 >
                   <X className="size-3" />
                   <span className="sr-only">Clear selection</span>
@@ -149,9 +205,16 @@ export function TimeRangePicker({
           className="w-[var(--radix-popover-trigger-width)] p-0"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          onInteractOutside={(e) => {
+            // Prevent closing when clicking the input
+            if (inputRef.current?.contains(e.target as Node)) {
+              e.preventDefault();
+            }
+          }}
         >
           <Command shouldFilter={false}>
-            <CommandList>
+            <CommandList className="max-h-[320px]">
               {/* Show parsed result if input is valid */}
               {parsedFromInput && (
                 <>
@@ -164,7 +227,7 @@ export function TimeRangePicker({
                         <Calendar className="size-4 text-primary" />
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {formatRangeDisplay(parsedFromInput)}
+                            {formatRangeDisplay(parsedFromInput, use24Hour)}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {formatDuration(parsedFromInput.start, parsedFromInput.end)}
@@ -178,27 +241,28 @@ export function TimeRangePicker({
                 </>
               )}
 
-              {/* Show filtered presets */}
+              {/* Show filtered presets in 3 columns */}
               {filteredPresets.length > 0 && (
                 <CommandGroup heading="Presets">
-                  {filteredPresets.map((preset) => {
-                    const range = preset.getRange();
-                    return (
-                      <CommandItem
+                  <div className="grid grid-cols-3 gap-1 p-1">
+                    {filteredPresets.map((preset) => (
+                      <button
                         key={preset.value}
-                        onSelect={() => handleSelectPreset(preset)}
-                        className="flex items-center justify-between"
+                        onClick={() => handleSelectPreset(preset)}
+                        className={cn(
+                          "flex flex-col items-start rounded-md px-2 py-1.5 text-left text-sm",
+                          "hover:bg-accent hover:text-accent-foreground",
+                          "focus:bg-accent focus:text-accent-foreground focus:outline-none",
+                          "cursor-pointer transition-colors"
+                        )}
                       >
-                        <div className="flex items-center gap-2">
-                          <Clock className="size-4 text-muted-foreground" />
-                          <span>{preset.label}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDuration(range.start, range.end)}
+                        <span className="font-medium truncate w-full">{preset.label}</span>
+                        <span className="text-xs text-muted-foreground truncate w-full">
+                          {preset.getHint(use24Hour)}
                         </span>
-                      </CommandItem>
-                    );
-                  })}
+                      </button>
+                    ))}
+                  </div>
                 </CommandGroup>
               )}
 
@@ -207,14 +271,16 @@ export function TimeRangePicker({
                 <>
                   <CommandSeparator />
                   <CommandGroup heading="Examples">
-                    <div className="px-2 py-1.5 text-xs text-muted-foreground space-y-1">
-                      <p>Try typing:</p>
-                      <ul className="space-y-0.5 list-disc list-inside">
-                        <li>Mar 3 - Mar 13</li>
-                        <li>14:00 - 14:30</li>
-                        <li>last friday to today</li>
-                        <li>past 2 weeks</li>
-                      </ul>
+                    <div className="px-3 py-2 text-xs text-muted-foreground space-y-1.5">
+                      <p className="font-medium">Try typing:</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                        <span>3h, 30m, 7d</span>
+                        <span>Mar 3 - Mar 13</span>
+                        <span>14:00 - 16:30</span>
+                        <span>9am - now</span>
+                        <span>past 2 weeks</span>
+                        <span>last friday</span>
+                      </div>
                     </div>
                   </CommandGroup>
                 </>
@@ -228,7 +294,7 @@ export function TimeRangePicker({
                       Could not parse "{inputValue}"
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Try "past 3 hours" or "Mar 1 - Mar 15"
+                      Try "3h", "past 3 hours" or "Mar 1 - Mar 15"
                     </p>
                   </div>
                 </CommandEmpty>
