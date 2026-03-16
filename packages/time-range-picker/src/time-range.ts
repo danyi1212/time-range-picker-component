@@ -495,13 +495,13 @@ export function getPresets(): TimeRangePreset[] {
 }
 
 // Parse shortcut patterns like "3h", "30m", "7d"
-function parseShortcut(input: string): TimeRange | null {
+function parseShortcut(input: string, ref: Date): TimeRange | null {
   const shortcutMatch = input.match(/^(\d+)(m|min|h|hr|d|day|w|wk|mo)s?$/i);
   if (!shortcutMatch) return null;
 
   const value = parseInt(shortcutMatch[1], 10);
   const unit = shortcutMatch[2].toLowerCase();
-  const now = new Date();
+  const now = ref;
 
   let start: Date;
   switch (unit) {
@@ -553,7 +553,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
   }
 
   // Handle shortcuts like "3h", "30m", "7d"
-  const shortcutResult = parseShortcut(trimmedInput);
+  const shortcutResult = parseShortcut(trimmedInput, ref);
   if (shortcutResult) {
     return shortcutResult;
   }
@@ -584,7 +584,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
   }
 
   // Handle ranges with "now" as end: "9am - now", "Mar 1 - now"
-  const nowRangeMatch = trimmedInput.match(/^(.+?)\s*[-–to]+\s*now$/i);
+  const nowRangeMatch = trimmedInput.match(/^(.+?)\s*(?:[-–]|\bto\b)\s*now$/i);
   if (nowRangeMatch) {
     const startDate = chrono.parseDate(nowRangeMatch[1], ref);
     if (startDate) {
@@ -599,7 +599,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
 
   // Handle time ranges like "14:00 - 14:30" or "2pm - 4pm"
   const timeRangeMatch = trimmedInput.match(
-    /^(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)\s*[-–to]+\s*(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)$/i,
+    /^(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)\s*(?:[-–]|\bto\b)\s*(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)$/i,
   );
   if (timeRangeMatch) {
     const startTime = chrono.parseDate(timeRangeMatch[1], ref);
@@ -620,7 +620,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
   }
 
   // Handle date ranges like "Mar 3 - Mar 13" or "March 3 to March 13"
-  const dateRangeMatch = trimmedInput.match(/^(.+?)\s*[-–to]+\s*(.+?)$/i);
+  const dateRangeMatch = trimmedInput.match(/^(.+?)\s*(?:[-–]|\bto\b)\s*(.+?)$/i);
   if (dateRangeMatch) {
     const startDate = chrono.parseDate(dateRangeMatch[1], ref);
     const endDate = chrono.parseDate(dateRangeMatch[2], ref);
