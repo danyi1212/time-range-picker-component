@@ -4,8 +4,7 @@
   "private": false,
   "files": [
     "src/",
-    "registry/",
-    "README.md"
+    "registry/"
   ],
   "type": "module",
   "main": "./src/index.ts",

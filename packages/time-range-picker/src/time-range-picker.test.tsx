@@ -1,6 +1,5 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import _userEvent from "@testing-library/user-event";
-import { describe, test, expect, vi, beforeEach } from "vitest";
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { TimeRangePicker } from "./time-range-picker";
 import type { TimeRange } from "./time-range";
 
@@ -28,19 +27,16 @@ vi.mock("./ui/popover", () => {
       children,
       __popoverOpen,
       __onOpenChange,
-      _onOpenAutoFocus,
-      _onCloseAutoFocus,
-      _onInteractOutside,
-      _className,
-      _align,
-      _sideOffset,
+      onOpenAutoFocus: _onOpenAutoFocus,
+      onCloseAutoFocus: _onCloseAutoFocus,
+      onInteractOutside: _onInteractOutside,
+      className: _className,
+      align: _align,
+      sideOffset: _sideOffset,
       ...props
     }: any) => {
       if (!__popoverOpen) return null;
       return React.createElement("div", { "data-testid": "popover-content", ...props }, children);
-    },
-    PopoverAnchor: ({ children, ...props }: any) => {
-      return React.createElement("div", props, children);
     },
   };
 });
@@ -49,6 +45,10 @@ describe("TimeRangePicker", () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date("2024-03-15T12:00:00"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   test("renders with default placeholder", () => {

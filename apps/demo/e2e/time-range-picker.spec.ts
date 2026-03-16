@@ -5,7 +5,9 @@ test.describe("Time Range Picker Demo", () => {
     await page.goto("/");
   });
 
-  test("page loads with picker visible and no console errors", async ({ page }) => {
+  test("page loads with picker visible and no console errors", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
     const errors: string[] = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") errors.push(msg.text());
@@ -15,6 +17,7 @@ test.describe("Time Range Picker Demo", () => {
     await expect(page.getByText("Natural Language Time Range Picker")).toBeVisible();
     await expect(page.getByPlaceholder("Search time range...")).toBeVisible();
     expect(errors).toHaveLength(0);
+    await context.close();
   });
 
   test("preset selection shows result card", async ({ page }) => {
@@ -62,7 +65,8 @@ test.describe("Time Range Picker Demo", () => {
     await expect(page.getByText("Selected Range")).toBeVisible();
     // Verify the ISO timestamp section shows a March date
     await expect(page.getByText("ISO Timestamps")).toBeVisible();
-    await expect(page.getByText(/2026-03/).first()).toBeVisible();
+    const year = new Date().getFullYear();
+    await expect(page.getByText(new RegExp(`${year}-03`)).first()).toBeVisible();
   });
 
   test("time range input", async ({ page }) => {

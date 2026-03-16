@@ -9,14 +9,11 @@ function readSource(relativePath: string): string {
   return readFileSync(resolve(pkgRoot, relativePath), "utf-8");
 }
 
-function transformToShadcnPaths(source: string, fileType: "component" | "lib"): string {
-  if (fileType === "component") {
-    return source
-      .replace(/from ["']\.\/utils["']/g, 'from "@/lib/utils"')
-      .replace(/from ["']\.\/ui\//g, 'from "@/components/ui/')
-      .replace(/from ["']\.\/time-range["']/g, 'from "@/lib/time-range"');
-  }
-  return source;
+function transformToShadcnPaths(source: string): string {
+  return source
+    .replace(/from ["']\.\/utils["']/g, 'from "@/lib/utils"')
+    .replace(/from ["']\.\/ui\//g, 'from "@/components/ui/')
+    .replace(/from ["']\.\/time-range["']/g, 'from "@/lib/time-range"');
 }
 
 const registry = {
@@ -32,7 +29,7 @@ const registry = {
     {
       path: "components/time-range-picker.tsx",
       type: "registry:ui",
-      content: transformToShadcnPaths(readSource("src/time-range-picker.tsx"), "component"),
+      content: transformToShadcnPaths(readSource("src/time-range-picker.tsx")),
     },
     {
       path: "lib/time-range.ts",
