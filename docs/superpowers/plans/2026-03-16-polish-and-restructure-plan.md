@@ -1187,7 +1187,7 @@ git commit -m "test: add Playwright E2E tests for demo app"
 - Create: `packages/time-range-picker/scripts/build-registry.ts`
 - Create: `packages/time-range-picker/registry/` (output directory)
 
-- [ ] **Step 1: Create the build script**
+- [x] **Step 1: Create the build script**
 
 Create `packages/time-range-picker/scripts/build-registry.ts`:
 
@@ -1235,7 +1235,7 @@ writeFileSync(
 console.log("Registry entry built: registry/time-range-picker.json");
 ```
 
-- [ ] **Step 2: Add build:registry script to library package.json**
+- [x] **Step 2: Add build:registry script to library package.json**
 
 Add to `packages/time-range-picker/package.json` scripts:
 
@@ -1249,12 +1249,12 @@ Also add `tsx` as a devDependency:
 cd packages/time-range-picker && pnpm add -D tsx
 ```
 
-- [ ] **Step 3: Run the build script**
+- [x] **Step 3: Run the build script**
 
 Run: `cd packages/time-range-picker && pnpm build:registry`
 Expected: `registry/time-range-picker.json` is created with inlined source content.
 
-- [ ] **Step 4: Verify the generated JSON is valid**
+- [x] **Step 4: Verify the generated JSON is valid**
 
 ```bash
 cat packages/time-range-picker/registry/time-range-picker.json | head -20
@@ -1262,7 +1262,7 @@ cat packages/time-range-picker/registry/time-range-picker.json | head -20
 
 Check that `files[].content` fields contain the actual source code.
 
-- [ ] **Step 5: Note about shadcn import paths**
+- [x] **Step 5: Note about shadcn import paths**
 
 The registry `content` fields contain the source files with relative imports (e.g., `./utils`, `./ui/badge`). When a consumer installs via `npx shadcn add`, the files land at `components/time-range-picker.tsx` and `lib/time-range.ts`. The component file needs to use `@/lib/time-range` and `@/components/ui/*` paths for the consumer's project — NOT relative imports.
 
@@ -1300,7 +1300,7 @@ files: [
 ];
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/time-range-picker/scripts/ packages/time-range-picker/registry/ packages/time-range-picker/package.json
