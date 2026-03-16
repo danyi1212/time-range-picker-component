@@ -558,9 +558,10 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
     return shortcutResult;
   }
 
-  // Handle ISO format dates
-  if (trimmedInput.includes("t") && trimmedInput.includes(":")) {
-    const parsed = parseISO(trimmedInput);
+  // Handle ISO format dates (use original trimmed input to preserve uppercase T)
+  const originalTrimmed = input.trim();
+  if (originalTrimmed.includes("T") && originalTrimmed.includes(":")) {
+    const parsed = parseISO(originalTrimmed);
     if (isValid(parsed)) {
       return {
         start: parsed,
