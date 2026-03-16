@@ -963,13 +963,13 @@ git commit -m "test: add component tests for TimeRangePicker"
 - Create: `apps/demo/e2e/playwright.config.ts`
 - Create: `apps/demo/e2e/time-range-picker.spec.ts`
 
-- [ ] **Step 1: Install Playwright**
+- [x] **Step 1: Install Playwright**
 
 ```bash
 cd apps/demo && pnpm exec playwright install chromium
 ```
 
-- [ ] **Step 2: Create Playwright config**
+- [x] **Step 2: Create Playwright config**
 
 Create `apps/demo/playwright.config.ts` (at demo root, not inside e2e/):
 
@@ -993,7 +993,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Write E2E tests**
+- [x] **Step 3: Write E2E tests**
 
 Create `apps/demo/e2e/time-range-picker.spec.ts`:
 
@@ -1158,7 +1158,7 @@ test.describe("Time Range Picker Demo", () => {
 });
 ```
 
-- [ ] **Step 4: Run E2E tests**
+- [x] **Step 4: Run E2E tests**
 
 Run: `cd apps/demo && pnpm test:e2e`
 Expected: All E2E tests pass against the running Vite dev server.
@@ -1169,7 +1169,7 @@ Debug and fix iteratively. Common issues:
 - Selectors: adjust if DOM structure differs from expectations
 - Portal rendering: popover content may be outside the main DOM tree
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/demo/playwright.config.ts apps/demo/e2e/ apps/demo/package.json

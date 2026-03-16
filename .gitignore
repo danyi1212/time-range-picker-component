@@ -6,8 +6,8 @@ dist
 apps/demo/dist
 
 # Playwright
-apps/demo/e2e/test-results
-apps/demo/e2e/playwright-report
+apps/demo/test-results
+apps/demo/playwright-report
 
 # OS
 .DS_Store
