@@ -39,7 +39,6 @@ export function TimeRangePicker({
 }: TimeRangePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const [previewRange, setPreviewRange] = React.useState<TimeRange | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -53,12 +52,7 @@ export function TimeRangePicker({
   }, [inputValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-
-    // Parse and preview the range as user types
-    const parsed = parseTimeRange(newValue);
-    setPreviewRange(parsed);
+    setInputValue(e.target.value);
 
     if (!open) {
       setOpen(true);
@@ -69,7 +63,6 @@ export function TimeRangePicker({
     const range = preset.getRange();
     onChange?.(range);
     setInputValue("");
-    setPreviewRange(null);
     setOpen(false);
   };
 
@@ -77,7 +70,6 @@ export function TimeRangePicker({
     if (parsedFromInput) {
       onChange?.(parsedFromInput);
       setInputValue("");
-      setPreviewRange(null);
       setOpen(false);
     }
   };
@@ -87,7 +79,6 @@ export function TimeRangePicker({
     e.preventDefault();
     onChange?.(null);
     setInputValue("");
-    setPreviewRange(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -95,7 +86,6 @@ export function TimeRangePicker({
       handleSelectParsed();
     } else if (e.key === "Escape") {
       setOpen(false);
-      setPreviewRange(null);
       inputRef.current?.blur();
     }
   };
@@ -129,17 +119,9 @@ export function TimeRangePicker({
           onChange?.(parsedFromInput);
         }
         setInputValue("");
-        setPreviewRange(null);
       }
     }, 150);
   };
-
-  // Reset preview when closing
-  React.useEffect(() => {
-    if (!open) {
-      setPreviewRange(null);
-    }
-  }, [open]);
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -290,10 +272,10 @@ export function TimeRangePicker({
       </Popover>
 
       {/* Preview indicator */}
-      {previewRange && !value && (
+      {parsedFromInput && !value && (
         <div className="absolute right-2 top-1/2 -translate-y-1/2">
           <Badge variant="outline" className="text-xs font-normal opacity-60">
-            {formatDuration(previewRange.start, previewRange.end)}
+            {formatDuration(parsedFromInput.start, parsedFromInput.end)}
           </Badge>
         </div>
       )}

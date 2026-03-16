@@ -9,5 +9,9 @@ apps/demo/dist
 apps/demo/test-results
 apps/demo/playwright-report
 
+# Environment
+.env
+.env.*
+
 # OS
 .DS_Store
