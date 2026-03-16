@@ -17,6 +17,7 @@
 ### Task 1: Create monorepo root config
 
 **Files:**
+
 - Create: `pnpm-workspace.yaml`
 - Modify: `package.json` (root)
 
@@ -82,6 +83,7 @@ git commit -m "chore: scaffold pnpm monorepo workspace root"
 ### Task 2: Create library package and migrate source files
 
 **Files:**
+
 - Create: `packages/time-range-picker/package.json`
 - Create: `packages/time-range-picker/tsconfig.json`
 - Create: `packages/time-range-picker/vitest.config.ts`
@@ -217,60 +219,102 @@ cp components/ui/button.tsx packages/time-range-picker/src/ui/button.tsx
 All files currently use `@/lib/utils` and `@/components/ui/*` path aliases. Since the library's `@` alias points to the package root and files now live under `src/`, we need to use relative imports instead (more portable, no alias dependency):
 
 **`src/time-range-picker.tsx`** — update imports:
+
 ```typescript
 // OLD:
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
-import { TimeRange, parseTimeRange, getFilteredPresets, formatDuration, formatRangeDisplay, getPresets, ClockFormat } from "@/lib/time-range";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+import {
+  TimeRange,
+  parseTimeRange,
+  getFilteredPresets,
+  formatDuration,
+  formatRangeDisplay,
+  getPresets,
+  ClockFormat,
+} from "@/lib/time-range";
 
 // NEW:
 import { cn } from "./utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList, CommandSeparator } from "./ui/command";
-import { TimeRange, parseTimeRange, getFilteredPresets, formatDuration, formatRangeDisplay, getPresets, ClockFormat } from "./time-range";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "./ui/command";
+import {
+  TimeRange,
+  parseTimeRange,
+  getFilteredPresets,
+  formatDuration,
+  formatRangeDisplay,
+  getPresets,
+  ClockFormat,
+} from "./time-range";
 ```
 
 Also remove `"use client"` directives from all library files — let consumers decide. This applies to `time-range-picker.tsx`, `popover.tsx`, `command.tsx`, and `separator.tsx`.
 
 **`src/ui/popover.tsx`** — update:
+
 ```typescript
 // OLD: import { cn } from '@/lib/utils'
 // NEW:
-import { cn } from '../utils'
+import { cn } from "../utils";
 ```
 
 **`src/ui/command.tsx`** — update imports AND strip CommandDialog:
+
 ```typescript
 // OLD:
-import { cn } from '@/lib/utils'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // NEW: remove dialog import entirely
-import { cn } from '../utils'
+import { cn } from "../utils";
 ```
 
 Remove the entire `CommandDialog` function (lines 32-61 of original) and remove `CommandDialog` from the export statement.
 
 **`src/ui/badge.tsx`** — update:
+
 ```typescript
 // OLD: import { cn } from '@/lib/utils'
 // NEW:
-import { cn } from '../utils'
+import { cn } from "../utils";
 ```
 
 **`src/ui/button.tsx`** — update:
+
 ```typescript
 // OLD: import { cn } from '@/lib/utils'
 // NEW:
-import { cn } from '../utils'
+import { cn } from "../utils";
 ```
 
 **`src/time-range.test.ts`** — update:
+
 ```typescript
 // OLD: import { ... } from "./time-range";
 // NEW: (stays the same — already uses relative import)
@@ -314,6 +358,7 @@ git commit -m "feat: create library package with migrated source and tests"
 ### Task 3: Create Vite demo app
 
 **Files:**
+
 - Create: `apps/demo/package.json`
 - Create: `apps/demo/tsconfig.json`
 - Create: `apps/demo/vite.config.ts`
@@ -457,6 +502,7 @@ cp app/globals.css apps/demo/src/globals.css
 - [x] **Step 8: Create src/App.tsx (migrate from app/page.tsx)**
 
 Adapt `app/page.tsx` with these changes:
+
 - Remove `"use client"` directive
 - Change `export default function` to `export default function App`
 - Import `TimeRangePicker` from `@danyi/time-range-picker`
@@ -477,9 +523,11 @@ cp components/ui/separator.tsx apps/demo/src/components/separator.tsx
 ```
 
 Update import paths in both files:
+
 - `@/lib/utils` → inline the `cn` utility or create a local utils.ts
 
 Create `apps/demo/src/lib/utils.ts`:
+
 ```typescript
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -490,14 +538,17 @@ export function cn(...inputs: ClassValue[]) {
 ```
 
 Update `apps/demo/src/components/card.tsx`:
+
 ```typescript
 // OLD: import { cn } from '@/lib/utils'
 // NEW:
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
 ```
+
 (This already works because the demo's `@` alias points to `src/` and we created `src/lib/utils.ts`)
 
 Update `apps/demo/src/components/separator.tsx`:
+
 ```typescript
 // Same — import { cn } from '@/lib/utils' already works
 ```
@@ -525,16 +576,17 @@ git commit -m "feat: create Vite demo app with migrated page"
 ### Task 4: Set up oxlint, oxfmt, husky, and lint-staged
 
 **Files:**
+
 - Modify: `package.json` (root — already has devDependencies from Task 1)
 - Create: `.husky/pre-commit`
 
-- [ ] **Step 1: Install root dev dependencies**
+- [x] **Step 1: Install root dev dependencies**
 
 ```bash
 pnpm install -D husky lint-staged oxlint oxfmt -w
 ```
 
-- [ ] **Step 2: Initialize husky**
+- [x] **Step 2: Initialize husky**
 
 ```bash
 pnpm exec husky init
@@ -542,14 +594,15 @@ pnpm exec husky init
 
 This creates `.husky/pre-commit` with a default script.
 
-- [ ] **Step 3: Configure pre-commit hook**
+- [x] **Step 3: Configure pre-commit hook**
 
 Write `.husky/pre-commit`:
+
 ```bash
 pnpm exec lint-staged
 ```
 
-- [ ] **Step 4: Initialize oxfmt config**
+- [x] **Step 4: Initialize oxfmt config**
 
 ```bash
 pnpm exec oxfmt --init
@@ -557,7 +610,7 @@ pnpm exec oxfmt --init
 
 This creates `.oxfmtrc.json` with defaults. Review and adjust if needed.
 
-- [ ] **Step 5: Run formatter on entire codebase**
+- [x] **Step 5: Run formatter on entire codebase**
 
 ```bash
 pnpm fmt
@@ -565,7 +618,7 @@ pnpm fmt
 
 This formats all `.ts`, `.tsx`, `.css`, `.json`, `.yaml` files.
 
-- [ ] **Step 6: Run linter on entire codebase**
+- [x] **Step 6: Run linter on entire codebase**
 
 ```bash
 pnpm lint
@@ -573,7 +626,7 @@ pnpm lint
 
 Fix any reported issues.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add .
@@ -585,6 +638,7 @@ git commit -m "chore: add oxlint, oxfmt, husky, and lint-staged"
 ### Task 5: Delete old files and clean up
 
 **Files to delete:**
+
 - `app/` (entire directory — layout.tsx, page.tsx, globals.css)
 - `components/` (entire directory — all 60+ shadcn components, time-range-picker.tsx, theme-provider.tsx)
 - `hooks/` (entire directory — use-mobile.ts, use-toast.ts)
@@ -664,6 +718,7 @@ git commit -m "chore: remove Next.js, unused shadcn components, and old files"
 ### Task 6: Write component tests for TimeRangePicker
 
 **Files:**
+
 - Create: `packages/time-range-picker/src/time-range-picker.test.tsx`
 
 These tests exercise the React component in jsdom using `@testing-library/react`. The vitest config already has `environment: "jsdom"` set up from Task 2.
@@ -859,9 +914,7 @@ describe("TimeRangePicker", () => {
       end: new Date("2024-03-15T16:30:00"),
       isLive: false,
     };
-    const { rerender } = render(
-      <TimeRangePicker value={value} clockFormat="24h" />,
-    );
+    const { rerender } = render(<TimeRangePicker value={value} clockFormat="24h" />);
     // 24h format shows as placeholder text
     const input24 = screen.getByRole("textbox") as HTMLInputElement;
     expect(input24.placeholder).toContain("14:00");
@@ -885,6 +938,7 @@ Run: `cd packages/time-range-picker && pnpm test`
 Expected: All unit tests (68) + new component tests pass.
 
 Some component tests may fail due to jsdom limitations with Radix UI portals. If so, adjust by:
+
 1. Mocking `PopoverContent` portal rendering
 2. Using `baseElement` queries instead of `screen` for portaled content
 3. Adding `ResizeObserver` and `IntersectionObserver` polyfills to test setup
@@ -905,6 +959,7 @@ git commit -m "test: add component tests for TimeRangePicker"
 ### Task 7: Set up Playwright and write E2E tests
 
 **Files:**
+
 - Create: `apps/demo/e2e/playwright.config.ts`
 - Create: `apps/demo/e2e/time-range-picker.spec.ts`
 
@@ -1109,6 +1164,7 @@ Run: `cd apps/demo && pnpm test:e2e`
 Expected: All E2E tests pass against the running Vite dev server.
 
 Debug and fix iteratively. Common issues:
+
 - Timing: add `waitFor` or increase timeouts for slow renders
 - Selectors: adjust if DOM structure differs from expectations
 - Portal rendering: popover content may be outside the main DOM tree
@@ -1127,6 +1183,7 @@ git commit -m "test: add Playwright E2E tests for demo app"
 ### Task 8: Create shadcn registry build script
 
 **Files:**
+
 - Create: `packages/time-range-picker/scripts/build-registry.ts`
 - Create: `packages/time-range-picker/registry/` (output directory)
 
@@ -1181,11 +1238,13 @@ console.log("Registry entry built: registry/time-range-picker.json");
 - [ ] **Step 2: Add build:registry script to library package.json**
 
 Add to `packages/time-range-picker/package.json` scripts:
+
 ```json
 "build:registry": "tsx scripts/build-registry.ts"
 ```
 
 Also add `tsx` as a devDependency:
+
 ```bash
 cd packages/time-range-picker && pnpm add -D tsx
 ```
@@ -1208,6 +1267,7 @@ Check that `files[].content` fields contain the actual source code.
 The registry `content` fields contain the source files with relative imports (e.g., `./utils`, `./ui/badge`). When a consumer installs via `npx shadcn add`, the files land at `components/time-range-picker.tsx` and `lib/time-range.ts`. The component file needs to use `@/lib/time-range` and `@/components/ui/*` paths for the consumer's project — NOT relative imports.
 
 This means we need **two versions** of the component imports:
+
 1. **Library package version** (relative imports) — for npm package usage
 2. **Registry version** (shadcn `@/` aliases) — for shadcn CLI installation
 
@@ -1228,6 +1288,7 @@ function transformToShadcnPaths(source: string, fileType: "component" | "lib"): 
 ```
 
 Apply to the files array:
+
 ```typescript
 files: [
   {
@@ -1236,7 +1297,7 @@ files: [
     content: transformToShadcnPaths(readSource("src/time-range-picker.tsx"), "component"),
   },
   // ...
-]
+];
 ```
 
 - [ ] **Step 6: Commit**
@@ -1257,6 +1318,7 @@ git commit -m "feat: add shadcn registry build script"
 ```bash
 pnpm test
 ```
+
 Expected: All library tests (unit + component) pass.
 
 - [ ] **Step 2: Run E2E tests**
@@ -1264,6 +1326,7 @@ Expected: All library tests (unit + component) pass.
 ```bash
 pnpm test:e2e
 ```
+
 Expected: All Playwright tests pass.
 
 - [ ] **Step 3: Run linter**
@@ -1271,6 +1334,7 @@ Expected: All Playwright tests pass.
 ```bash
 pnpm lint
 ```
+
 Expected: No errors.
 
 - [ ] **Step 4: Run formatter check**
@@ -1278,6 +1342,7 @@ Expected: No errors.
 ```bash
 pnpm fmt:check
 ```
+
 Expected: No formatting issues (we already ran `pnpm fmt` in Task 4).
 
 - [ ] **Step 5: Run typecheck**
@@ -1285,17 +1350,21 @@ Expected: No formatting issues (we already ran `pnpm fmt` in Task 4).
 ```bash
 pnpm typecheck
 ```
+
 Expected: No TypeScript errors in either workspace.
 
 - [ ] **Step 6: Test pre-commit hook**
 
 Make a small change, stage it, and attempt a commit to verify the hook fires. Then reset to avoid a noise commit:
+
 ```bash
 echo "" >> packages/time-range-picker/src/index.ts
 git add packages/time-range-picker/src/index.ts
 git commit -m "test: verify pre-commit hook"
 ```
+
 Expected: husky triggers lint-staged, which runs oxlint and oxfmt on the staged file. If the commit succeeds, revert it:
+
 ```bash
 git reset HEAD~1
 git checkout -- packages/time-range-picker/src/index.ts
@@ -1308,6 +1377,7 @@ cd apps/demo && pnpm dev
 ```
 
 Manually verify:
+
 1. Page loads at localhost:5173
 2. Picker opens on click
 3. Typing "3h" shows parsed result
