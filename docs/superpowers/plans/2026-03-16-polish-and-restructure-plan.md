@@ -1313,7 +1313,7 @@ git commit -m "feat: add shadcn registry build script"
 
 **Files:** Various
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 ```bash
 pnpm test
@@ -1321,7 +1321,7 @@ pnpm test
 
 Expected: All library tests (unit + component) pass.
 
-- [ ] **Step 2: Run E2E tests**
+- [x] **Step 2: Run E2E tests**
 
 ```bash
 pnpm test:e2e
@@ -1329,7 +1329,7 @@ pnpm test:e2e
 
 Expected: All Playwright tests pass.
 
-- [ ] **Step 3: Run linter**
+- [x] **Step 3: Run linter**
 
 ```bash
 pnpm lint
@@ -1337,7 +1337,7 @@ pnpm lint
 
 Expected: No errors.
 
-- [ ] **Step 4: Run formatter check**
+- [x] **Step 4: Run formatter check**
 
 ```bash
 pnpm fmt:check
@@ -1345,7 +1345,7 @@ pnpm fmt:check
 
 Expected: No formatting issues (we already ran `pnpm fmt` in Task 4).
 
-- [ ] **Step 5: Run typecheck**
+- [x] **Step 5: Run typecheck**
 
 ```bash
 pnpm typecheck
@@ -1353,7 +1353,7 @@ pnpm typecheck
 
 Expected: No TypeScript errors in either workspace.
 
-- [ ] **Step 6: Test pre-commit hook**
+- [x] **Step 6: Test pre-commit hook**
 
 Make a small change, stage it, and attempt a commit to verify the hook fires. Then reset to avoid a noise commit:
 
@@ -1370,7 +1370,7 @@ git reset HEAD~1
 git checkout -- packages/time-range-picker/src/index.ts
 ```
 
-- [ ] **Step 7: Verify demo app works end-to-end**
+- [x] **Step 7: Verify demo app works end-to-end**
 
 ```bash
 cd apps/demo && pnpm dev
@@ -1386,7 +1386,7 @@ Manually verify:
 6. 12h/24h toggle works
 7. Clear button works
 
-- [ ] **Step 8: Final commit**
+- [x] **Step 8: Final commit**
 
 ```bash
 git add -A
