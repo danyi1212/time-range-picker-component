@@ -148,11 +148,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 15 minutes",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: subMinutes(new Date(), 15),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: subMinutes(new Date(), 15),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Past 30 minutes",
@@ -164,11 +168,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 30 minutes",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: subMinutes(new Date(), 30),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: subMinutes(new Date(), 30),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     // Hours
     {
@@ -181,11 +189,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 1 hour",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: subHours(new Date(), 1),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: subHours(new Date(), 1),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Past 3 hours",
@@ -197,11 +209,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 3 hours",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: subHours(new Date(), 3),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: subHours(new Date(), 3),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Past 6 hours",
@@ -213,11 +229,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 6 hours",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: subHours(new Date(), 6),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: subHours(new Date(), 6),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Past 12 hours",
@@ -229,11 +249,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 12 hours",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: subHours(new Date(), 12),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: subHours(new Date(), 12),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Past 24 hours",
@@ -245,11 +269,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 24 hours",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: subHours(new Date(), 24),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: subHours(new Date(), 24),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     // Days
     {
@@ -261,11 +289,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Today",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: startOfDay(new Date()),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: startOfDay(new Date()),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Yesterday",
@@ -281,11 +313,14 @@ export function getPresets(): TimeRangePreset[] {
       },
       getHint: (use24Hour) => {
         const yesterday = subDays(new Date(), 1);
-        return formatPresetHint({
-          start: startOfDay(yesterday),
-          end: endOfDay(yesterday),
-          isLive: false,
-        }, use24Hour);
+        return formatPresetHint(
+          {
+            start: startOfDay(yesterday),
+            end: endOfDay(yesterday),
+            isLive: false,
+          },
+          use24Hour,
+        );
       },
     },
     {
@@ -298,11 +333,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 3 days",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: startOfDay(subDays(new Date(), 3)),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: startOfDay(subDays(new Date(), 3)),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Past 7 days",
@@ -314,11 +353,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 7 days",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: startOfDay(subDays(new Date(), 7)),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: startOfDay(subDays(new Date(), 7)),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     // Weeks
     {
@@ -330,11 +373,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "This week",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: startOfWeek(new Date(), { weekStartsOn: 1 }),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: startOfWeek(new Date(), { weekStartsOn: 1 }),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Last week",
@@ -350,11 +397,14 @@ export function getPresets(): TimeRangePreset[] {
       },
       getHint: (use24Hour) => {
         const lastWeek = subWeeks(new Date(), 1);
-        return formatPresetHint({
-          start: startOfWeek(lastWeek, { weekStartsOn: 1 }),
-          end: endOfWeek(lastWeek, { weekStartsOn: 1 }),
-          isLive: false,
-        }, use24Hour);
+        return formatPresetHint(
+          {
+            start: startOfWeek(lastWeek, { weekStartsOn: 1 }),
+            end: endOfWeek(lastWeek, { weekStartsOn: 1 }),
+            isLive: false,
+          },
+          use24Hour,
+        );
       },
     },
     // Months
@@ -367,11 +417,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "This month",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: startOfMonth(new Date()),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: startOfMonth(new Date()),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Last month",
@@ -387,11 +441,14 @@ export function getPresets(): TimeRangePreset[] {
       },
       getHint: (use24Hour) => {
         const lastMonth = subMonths(new Date(), 1);
-        return formatPresetHint({
-          start: startOfMonth(lastMonth),
-          end: endOfMonth(lastMonth),
-          isLive: false,
-        }, use24Hour);
+        return formatPresetHint(
+          {
+            start: startOfMonth(lastMonth),
+            end: endOfMonth(lastMonth),
+            isLive: false,
+          },
+          use24Hour,
+        );
       },
     },
     {
@@ -404,11 +461,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 30 days",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: startOfDay(subDays(new Date(), 30)),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: startOfDay(subDays(new Date(), 30)),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
     {
       label: "Past 90 days",
@@ -420,11 +481,15 @@ export function getPresets(): TimeRangePreset[] {
         label: "Past 90 days",
         isLive: true,
       }),
-      getHint: (use24Hour) => formatPresetHint({
-        start: startOfDay(subDays(new Date(), 90)),
-        end: new Date(),
-        isLive: true,
-      }, use24Hour),
+      getHint: (use24Hour) =>
+        formatPresetHint(
+          {
+            start: startOfDay(subDays(new Date(), 90)),
+            end: new Date(),
+            isLive: true,
+          },
+          use24Hour,
+        ),
     },
   ];
 }
@@ -512,16 +577,14 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
     (p) =>
       p.value.toLowerCase() === trimmedInput ||
       p.label.toLowerCase() === trimmedInput ||
-      (p.shortcut && p.shortcut.toLowerCase() === trimmedInput)
+      (p.shortcut && p.shortcut.toLowerCase() === trimmedInput),
   );
   if (matchedPreset) {
     return matchedPreset.getRange();
   }
 
   // Handle ranges with "now" as end: "9am - now", "Mar 1 - now"
-  const nowRangeMatch = trimmedInput.match(
-    /^(.+?)\s*[-–to]+\s*now$/i
-  );
+  const nowRangeMatch = trimmedInput.match(/^(.+?)\s*[-–to]+\s*now$/i);
   if (nowRangeMatch) {
     const startDate = chrono.parseDate(nowRangeMatch[1], ref);
     if (startDate) {
@@ -536,7 +599,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
 
   // Handle time ranges like "14:00 - 14:30" or "2pm - 4pm"
   const timeRangeMatch = trimmedInput.match(
-    /^(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)\s*[-–to]+\s*(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)$/i
+    /^(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)\s*[-–to]+\s*(\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?)$/i,
   );
   if (timeRangeMatch) {
     const startTime = chrono.parseDate(timeRangeMatch[1], ref);
@@ -557,9 +620,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
   }
 
   // Handle date ranges like "Mar 3 - Mar 13" or "March 3 to March 13"
-  const dateRangeMatch = trimmedInput.match(
-    /^(.+?)\s*[-–to]+\s*(.+?)$/i
-  );
+  const dateRangeMatch = trimmedInput.match(/^(.+?)\s*[-–to]+\s*(.+?)$/i);
   if (dateRangeMatch) {
     const startDate = chrono.parseDate(dateRangeMatch[1], ref);
     const endDate = chrono.parseDate(dateRangeMatch[2], ref);
@@ -608,10 +669,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
       }
 
       // For single date mentions, use start of day to end of day
-      if (
-        !result.start.get("hour") &&
-        !result.start.get("minute")
-      ) {
+      if (!result.start.get("hour") && !result.start.get("minute")) {
         return {
           start: startOfDay(startDate),
           end: endOfDay(startDate),
@@ -645,6 +703,6 @@ export function getFilteredPresets(input: string): TimeRangePreset[] {
     (preset) =>
       preset.label.toLowerCase().includes(lowerInput) ||
       preset.value.toLowerCase().includes(lowerInput) ||
-      (preset.shortcut && preset.shortcut.toLowerCase().startsWith(lowerInput))
+      (preset.shortcut && preset.shortcut.toLowerCase().startsWith(lowerInput)),
   );
 }

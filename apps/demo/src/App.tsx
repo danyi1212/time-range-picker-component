@@ -1,6 +1,11 @@
 import * as React from "react";
 import { TimeRangePicker } from "@danyi/time-range-picker";
-import { TimeRange, formatDuration, formatRangeDisplay, ClockFormat } from "@danyi/time-range-picker";
+import {
+  TimeRange,
+  formatDuration,
+  formatRangeDisplay,
+  ClockFormat,
+} from "@danyi/time-range-picker";
 import { Badge, Button } from "@danyi/time-range-picker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/card";
 import { Separator } from "@/components/separator";
@@ -36,7 +41,8 @@ export default function App() {
               Natural Language Time Range Picker
             </h1>
             <p className="text-muted-foreground text-pretty">
-              Type natural language or select from presets. Supports date ranges, time ranges, and relative periods.
+              Type natural language or select from presets. Supports date ranges, time ranges, and
+              relative periods.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -48,12 +54,7 @@ export default function App() {
             >
               {clockFormat === "24h" ? "24h" : "12h"}
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            >
+            <Button variant="outline" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
           </div>
@@ -146,27 +147,19 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Local Start</label>
-                    <div className="font-medium">
-                      {selectedRange.start.toLocaleString()}
-                    </div>
+                    <div className="font-medium">{selectedRange.start.toLocaleString()}</div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Local End</label>
-                    <div className="font-medium">
-                      {selectedRange.end.toLocaleString()}
-                    </div>
+                    <div className="font-medium">{selectedRange.end.toLocaleString()}</div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Unix Start (ms)</label>
-                    <div className="font-mono text-xs">
-                      {selectedRange.start.getTime()}
-                    </div>
+                    <div className="font-mono text-xs">{selectedRange.start.getTime()}</div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Unix End (ms)</label>
-                    <div className="font-mono text-xs">
-                      {selectedRange.end.getTime()}
-                    </div>
+                    <div className="font-mono text-xs">{selectedRange.end.getTime()}</div>
                   </div>
                 </div>
               </div>

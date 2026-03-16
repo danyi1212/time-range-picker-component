@@ -18,8 +18,6 @@ import {
   setMinutes,
   startOfWeek,
   endOfWeek,
-  startOfMonth,
-  endOfMonth,
 } from "date-fns";
 import { vi, beforeEach, afterEach } from "vitest";
 
@@ -320,9 +318,7 @@ describe("parseTimeRange", () => {
       const result = parseTimeRange("this week", ref);
       expect(result).not.toBeNull();
       expect(result?.label).toBe("This week");
-      expect(result?.start.getTime()).toBe(
-        startOfWeek(ref, { weekStartsOn: 1 }).getTime()
-      );
+      expect(result?.start.getTime()).toBe(startOfWeek(ref, { weekStartsOn: 1 }).getTime());
     });
 
     test("parses 'last week'", () => {
@@ -330,12 +326,8 @@ describe("parseTimeRange", () => {
       expect(result).not.toBeNull();
       expect(result?.label).toBe("Last week");
       const lastWeek = subWeeks(ref, 1);
-      expect(result?.start.getTime()).toBe(
-        startOfWeek(lastWeek, { weekStartsOn: 1 }).getTime()
-      );
-      expect(result?.end.getTime()).toBe(
-        endOfWeek(lastWeek, { weekStartsOn: 1 }).getTime()
-      );
+      expect(result?.start.getTime()).toBe(startOfWeek(lastWeek, { weekStartsOn: 1 }).getTime());
+      expect(result?.end.getTime()).toBe(endOfWeek(lastWeek, { weekStartsOn: 1 }).getTime());
     });
   });
 
@@ -537,9 +529,7 @@ describe("parseTimeRange", () => {
       testCases.forEach((input) => {
         const result = parseTimeRange(input);
         if (result) {
-          expect(result.start.getTime()).toBeLessThanOrEqual(
-            result.end.getTime()
-          );
+          expect(result.start.getTime()).toBeLessThanOrEqual(result.end.getTime());
         }
       });
     });
@@ -668,12 +658,8 @@ describe("integration tests", () => {
     const startISO = range.start.toISOString();
     const endISO = range.end.toISOString();
 
-    expect(startISO).toMatch(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/
-    );
-    expect(endISO).toMatch(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/
-    );
+    expect(startISO).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
+    expect(endISO).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
     expect(range.isLive).toBe(true);
   });
 

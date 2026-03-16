@@ -12,11 +12,11 @@
   },
   "dependencies": {
     "@danyi/time-range-picker": "workspace:*",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "lucide-react": "^0.564.0",
     "@radix-ui/react-separator": "^1.1.8",
     "clsx": "^2.1.1",
+    "lucide-react": "^0.564.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
