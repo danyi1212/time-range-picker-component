@@ -1,7 +1,7 @@
 {
   "name": "@danyi/time-range-picker",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "files": [
     "src/",
     "registry/"

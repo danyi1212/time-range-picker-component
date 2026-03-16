@@ -23,7 +23,7 @@ const registry = {
   title: "Time Range Picker",
   description:
     "A time range picker with natural language parsing. Supports shortcuts (3h, 7d), presets (today, last week), date/time ranges, and natural language input.",
-  dependencies: ["date-fns", "chrono-node"],
+  dependencies: ["date-fns", "chrono-node", "lucide-react"],
   registryDependencies: ["popover", "command", "badge", "button"],
   files: [
     {
