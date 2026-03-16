@@ -723,7 +723,7 @@ git commit -m "chore: remove Next.js, unused shadcn components, and old files"
 
 These tests exercise the React component in jsdom using `@testing-library/react`. The vitest config already has `environment: "jsdom"` set up from Task 2.
 
-- [ ] **Step 1: Create test setup file**
+- [x] **Step 1: Create test setup file**
 
 Create `packages/time-range-picker/src/test-setup.ts`:
 
@@ -753,7 +753,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 2: Write component tests**
+- [x] **Step 2: Write component tests**
 
 Create `packages/time-range-picker/src/time-range-picker.test.tsx`:
 
@@ -926,13 +926,13 @@ describe("TimeRangePicker", () => {
 });
 ```
 
-- [ ] **Step 3: Add @testing-library/user-event to devDependencies**
+- [x] **Step 3: Add @testing-library/user-event to devDependencies**
 
 ```bash
 cd packages/time-range-picker && pnpm add -D @testing-library/user-event
 ```
 
-- [ ] **Step 4: Run component tests**
+- [x] **Step 4: Run component tests**
 
 Run: `cd packages/time-range-picker && pnpm test`
 Expected: All unit tests (68) + new component tests pass.
@@ -945,7 +945,7 @@ Some component tests may fail due to jsdom limitations with Radix UI portals. If
 
 Debug and fix iteratively until all tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/time-range-picker/src/time-range-picker.test.tsx packages/time-range-picker/src/test-setup.ts packages/time-range-picker/vitest.config.ts packages/time-range-picker/package.json
