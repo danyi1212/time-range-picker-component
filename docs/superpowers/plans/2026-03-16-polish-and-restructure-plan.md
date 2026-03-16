@@ -20,7 +20,7 @@
 - Create: `pnpm-workspace.yaml`
 - Modify: `package.json` (root)
 
-- [ ] **Step 1: Create pnpm-workspace.yaml**
+- [x] **Step 1: Create pnpm-workspace.yaml**
 
 ```yaml
 packages:
@@ -28,7 +28,7 @@ packages:
   - "apps/*"
 ```
 
-- [ ] **Step 2: Rewrite root package.json**
+- [x] **Step 2: Rewrite root package.json**
 
 Replace the current root `package.json` with a workspace root config. Remove all app-level dependencies — they'll move to the workspace packages.
 
@@ -60,7 +60,7 @@ Replace the current root `package.json` with a workspace root config. Remove all
 }
 ```
 
-- [ ] **Step 3: Delete old lockfile and install**
+- [x] **Step 3: Delete old lockfile and install**
 
 The old `pnpm-lock.yaml` references dependencies from the previous flat project. Delete it and reinstall:
 
@@ -70,7 +70,7 @@ rm pnpm-lock.yaml && pnpm install
 
 (Will warn about missing workspace packages — that's expected at this stage.)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pnpm-workspace.yaml package.json
