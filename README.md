@@ -1,35 +1,158 @@
-# time-range-picker-component
+# Time Range Picker
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+A [shadcn/ui](https://ui.shadcn.com) component for selecting time ranges with natural language parsing. Supports shortcuts (`3h`, `7d`), presets (today, last week), date/time ranges, and free-form natural language input.
 
-## Built with v0
+![CI](https://github.com/danyi1212/time-range-picker-component/actions/workflows/ci.yml/badge.svg)
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+## Features
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_vIAmWkUE4hxU7v4ZUcpCQauJCMMl)
+- Natural language parsing — type "past 3 hours", "last friday", or "Mar 1 - Mar 15"
+- Shortcut syntax — `3h`, `30m`, `7d`, `2w`, `1mo`
+- Built-in presets — today, yesterday, this week, last month, and more
+- 12h / 24h clock format support
+- Accessible — keyboard navigation, screen reader labels
+- Dark mode support
+- Fully styled with Tailwind CSS and shadcn/ui primitives
 
-## Getting Started
+## Installation
 
-First, run the development server:
+### Via shadcn registry (recommended)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+npx shadcn@latest add https://raw.githubusercontent.com/danyi1212/time-range-picker-component/main/packages/time-range-picker/registry/time-range-picker.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This installs the component and its dependencies (`date-fns`, `chrono-node`, `lucide-react`) and the required shadcn primitives (`popover`, `command`, `badge`, `button`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Manual
 
-## Learn More
+Copy the two source files into your project:
 
-To learn more, take a look at the following resources:
+- `components/time-range-picker.tsx` — the React component
+- `lib/time-range.ts` — time range parsing logic and presets
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+Then install the dependencies:
 
-<a href="https://v0.app/chat/api/kiro/clone/danyi1212/time-range-picker-component" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+```bash
+npm install date-fns chrono-node lucide-react
+```
+
+And make sure you have the shadcn primitives installed:
+
+```bash
+npx shadcn@latest add popover command badge button
+```
+
+## Usage
+
+```tsx
+import { useState } from "react";
+import { TimeRangePicker } from "@/components/time-range-picker";
+import { TimeRange } from "@/lib/time-range";
+
+export function MyComponent() {
+  const [range, setRange] = useState<TimeRange | null>(null);
+
+  return (
+    <TimeRangePicker
+      value={range}
+      onChange={setRange}
+      clockFormat="24h"
+      placeholder="Search time range..."
+    />
+  );
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `TimeRange \| null` | `undefined` | The selected time range |
+| `onChange` | `(range: TimeRange \| null) => void` | `undefined` | Called when the selection changes |
+| `placeholder` | `string` | `"Search time range..."` | Input placeholder text |
+| `className` | `string` | `undefined` | Additional CSS classes |
+| `clockFormat` | `"12h" \| "24h"` | `"24h"` | Clock display format |
+
+## Types
+
+```ts
+interface TimeRange {
+  start: Date;
+  end: Date;
+  label?: string;
+  isLive?: boolean; // true if end represents "now"
+}
+
+type ClockFormat = "12h" | "24h";
+```
+
+## Utilities
+
+The `time-range` module also exports helpers you can use independently:
+
+```ts
+import {
+  parseTimeRange,
+  formatDuration,
+  formatRangeDisplay,
+  getPresets,
+  getFilteredPresets,
+} from "@/lib/time-range";
+
+// Parse natural language to a TimeRange
+const range = parseTimeRange("past 3 hours");
+
+// Format a duration string like "3h" or "2d 5h"
+const duration = formatDuration(range.start, range.end);
+
+// Format a display string like "Today, 14:00 - 17:00"
+const display = formatRangeDisplay(range, true);
+```
+
+## Development
+
+This is a pnpm monorepo with the component library in `packages/time-range-picker/` and a demo app in `apps/demo/`.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org) >= 18
+- [pnpm](https://pnpm.io) 10
+
+### Setup
+
+```bash
+pnpm install
+```
+
+### Commands
+
+```bash
+# Run the demo app
+pnpm --filter demo dev
+
+# Run unit tests
+pnpm test
+
+# Run E2E tests (requires the demo app built)
+pnpm test:e2e
+
+# Type check
+pnpm typecheck
+
+# Lint
+pnpm lint
+
+# Format
+pnpm fmt
+
+# Check formatting
+pnpm fmt:check
+
+# Build the shadcn registry JSON
+pnpm --filter @danyi/time-range-picker build:registry
+```
+
+## License
+
+[MIT](LICENSE)

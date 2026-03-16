@@ -2,6 +2,8 @@
   "name": "time-range-picker-component",
   "private": true,
   "scripts": {
+    "dev": "pnpm --filter demo dev",
+    "build": "pnpm --filter demo build",
     "lint": "oxlint .",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
