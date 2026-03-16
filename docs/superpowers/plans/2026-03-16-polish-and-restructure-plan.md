@@ -651,13 +651,13 @@ git commit -m "chore: add oxlint, oxfmt, husky, and lint-staged"
 - `components.json`
 - `vitest.config.ts` (root — now in library package)
 
-- [ ] **Step 1: Delete old source directories**
+- [x] **Step 1: Delete old source directories**
 
 ```bash
 rm -rf app/ components/ hooks/ lib/ scripts/ styles/ public/
 ```
 
-- [ ] **Step 2: Delete old config files**
+- [x] **Step 2: Delete old config files**
 
 ```bash
 rm -f next.config.mjs postcss.config.mjs components.json vitest.config.ts tsconfig.json
@@ -665,7 +665,7 @@ rm -f next.config.mjs postcss.config.mjs components.json vitest.config.ts tsconf
 
 Note: the root `tsconfig.json` has stale Next.js references (`.next/types`, `next-env.d.ts`). Each workspace package has its own `tsconfig.json` now.
 
-- [ ] **Step 3: Update .gitignore**
+- [x] **Step 3: Update .gitignore**
 
 Remove any Next.js-specific entries (`.next/`) and add Vite/Playwright entries:
 
@@ -686,7 +686,7 @@ apps/demo/e2e/playwright-report
 .DS_Store
 ```
 
-- [ ] **Step 4: Remove unused dependencies from pnpm-lock.yaml**
+- [x] **Step 4: Remove unused dependencies from pnpm-lock.yaml**
 
 ```bash
 pnpm install
@@ -694,17 +694,17 @@ pnpm install
 
 This will clean the lockfile since we deleted package.json entries that referenced old deps.
 
-- [ ] **Step 5: Verify library tests still pass**
+- [x] **Step 5: Verify library tests still pass**
 
 Run: `pnpm test`
 Expected: All 68 tests pass in the library workspace.
 
-- [ ] **Step 6: Verify demo dev server still works**
+- [x] **Step 6: Verify demo dev server still works**
 
 Run: `cd apps/demo && pnpm dev`
 Expected: Dev server starts, page renders correctly.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A
