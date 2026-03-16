@@ -12,6 +12,7 @@ apps/demo/playwright-report
 # Environment
 .env
 .env.*
+.npmrc
 
 # OS
 .DS_Store
