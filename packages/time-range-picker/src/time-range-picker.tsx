@@ -3,7 +3,7 @@ import { Clock, Calendar, ChevronRight, X } from "lucide-react";
 import { cn } from "./utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Popover, PopoverAnchor, PopoverContent } from "./ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -126,7 +126,7 @@ export function TimeRangePicker({
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        <PopoverAnchor asChild>
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
               <Clock className="size-4" />
@@ -169,9 +169,9 @@ export function TimeRangePicker({
               </div>
             )}
           </div>
-        </PopoverTrigger>
+        </PopoverAnchor>
         <PopoverContent
-          className="w-[var(--radix-popover-trigger-width)] p-0"
+          className="w-[var(--radix-popover-anchor-width)] p-0"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}

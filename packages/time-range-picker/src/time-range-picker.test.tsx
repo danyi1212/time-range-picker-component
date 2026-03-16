@@ -23,6 +23,12 @@ vi.mock("./ui/popover", () => {
       }
       return React.createElement("button", props, children);
     },
+    PopoverAnchor: ({ children, asChild, __popoverOpen, __onOpenChange, ...props }: any) => {
+      if (asChild) {
+        return React.cloneElement(React.Children.only(children), props);
+      }
+      return React.createElement("div", props, children);
+    },
     PopoverContent: ({
       children,
       __popoverOpen,
