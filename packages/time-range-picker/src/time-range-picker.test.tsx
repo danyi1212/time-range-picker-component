@@ -1,5 +1,5 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import _userEvent from "@testing-library/user-event";
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { TimeRangePicker } from "./time-range-picker";
 import type { TimeRange } from "./time-range";
@@ -28,12 +28,12 @@ vi.mock("./ui/popover", () => {
       children,
       __popoverOpen,
       __onOpenChange,
-      onOpenAutoFocus,
-      onCloseAutoFocus,
-      onInteractOutside,
-      className,
-      align,
-      sideOffset,
+      _onOpenAutoFocus,
+      _onCloseAutoFocus,
+      _onInteractOutside,
+      _className,
+      _align,
+      _sideOffset,
       ...props
     }: any) => {
       if (!__popoverOpen) return null;
