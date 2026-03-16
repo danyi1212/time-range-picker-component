@@ -45,24 +45,12 @@ export function TimeRangePicker({
 
   const use24Hour = clockFormat === "24h";
 
-  const filteredPresets = React.useMemo(
-    () => getFilteredPresets(inputValue),
-    [inputValue]
-  );
+  const filteredPresets = React.useMemo(() => getFilteredPresets(inputValue), [inputValue]);
 
   const parsedFromInput = React.useMemo(() => {
     if (!inputValue.trim()) return null;
     return parseTimeRange(inputValue);
   }, [inputValue]);
-
-  const displayRange = previewRange || value;
-
-  // Get display text for the input
-  const getDisplayText = (): string => {
-    if (inputValue) return inputValue;
-    if (value) return formatRangeDisplay(value, use24Hour);
-    return "";
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -112,7 +100,7 @@ export function TimeRangePicker({
     }
   };
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleFocus = (_e: React.FocusEvent<HTMLInputElement>) => {
     // When focusing, if there's a value, populate the input for editing
     if (value && !inputValue) {
       const displayText = formatRangeDisplay(value, use24Hour);
@@ -177,7 +165,7 @@ export function TimeRangePicker({
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 "pl-9 pr-24",
-                value && !inputValue && "placeholder:text-foreground"
+                value && !inputValue && "placeholder:text-foreground",
               )}
             />
             {value && (
@@ -252,7 +240,7 @@ export function TimeRangePicker({
                           "flex flex-col items-start rounded-md px-2 py-1.5 text-left text-sm",
                           "hover:bg-accent hover:text-accent-foreground",
                           "focus:bg-accent focus:text-accent-foreground focus:outline-none",
-                          "cursor-pointer transition-colors"
+                          "cursor-pointer transition-colors",
                         )}
                       >
                         <span className="font-medium truncate w-full">{preset.label}</span>
@@ -289,9 +277,7 @@ export function TimeRangePicker({
               {inputValue && filteredPresets.length === 0 && !parsedFromInput && (
                 <CommandEmpty>
                   <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground">
-                      Could not parse "{inputValue}"
-                    </p>
+                    <p className="text-sm text-muted-foreground">Could not parse "{inputValue}"</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Try "3h", "past 3 hours" or "Mar 1 - Mar 15"
                     </p>
