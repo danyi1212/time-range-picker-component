@@ -324,13 +324,13 @@ git commit -m "feat: create library package with migrated source and tests"
 - Copy: `components/ui/card.tsx` → `apps/demo/src/components/card.tsx`
 - Copy: `components/ui/separator.tsx` → `apps/demo/src/components/separator.tsx`
 
-- [ ] **Step 1: Create directory structure**
+- [x] **Step 1: Create directory structure**
 
 ```bash
 mkdir -p apps/demo/src/components apps/demo/e2e
 ```
 
-- [ ] **Step 2: Create demo package.json**
+- [x] **Step 2: Create demo package.json**
 
 ```json
 {
@@ -367,7 +367,7 @@ mkdir -p apps/demo/src/components apps/demo/e2e
 }
 ```
 
-- [ ] **Step 3: Create demo tsconfig.json**
+- [x] **Step 3: Create demo tsconfig.json**
 
 ```json
 {
@@ -390,7 +390,7 @@ mkdir -p apps/demo/src/components apps/demo/e2e
 }
 ```
 
-- [ ] **Step 4: Create vite.config.ts**
+- [x] **Step 4: Create vite.config.ts**
 
 ```typescript
 import { defineConfig } from "vite";
@@ -408,7 +408,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 5: Create index.html**
+- [x] **Step 5: Create index.html**
 
 ```html
 <!DOCTYPE html>
@@ -431,7 +431,7 @@ export default defineConfig({
 </html>
 ```
 
-- [ ] **Step 6: Create src/main.tsx**
+- [x] **Step 6: Create src/main.tsx**
 
 ```tsx
 import { StrictMode } from "react";
@@ -446,7 +446,7 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-- [ ] **Step 7: Create src/globals.css**
+- [x] **Step 7: Create src/globals.css**
 
 Copy `app/globals.css` as-is (it already has `@import 'tailwindcss'` and `@import 'tw-animate-css'`, theme variables, and dark mode). No changes needed — it doesn't reference anything Next.js-specific.
 
@@ -454,7 +454,7 @@ Copy `app/globals.css` as-is (it already has `@import 'tailwindcss'` and `@impor
 cp app/globals.css apps/demo/src/globals.css
 ```
 
-- [ ] **Step 8: Create src/App.tsx (migrate from app/page.tsx)**
+- [x] **Step 8: Create src/App.tsx (migrate from app/page.tsx)**
 
 Adapt `app/page.tsx` with these changes:
 - Remove `"use client"` directive
@@ -469,7 +469,7 @@ Adapt `app/page.tsx` with these changes:
 
 The demo app component structure stays the same, just the imports change and the hydration guard is removed.
 
-- [ ] **Step 9: Copy demo-only shadcn components**
+- [x] **Step 9: Copy demo-only shadcn components**
 
 ```bash
 cp components/ui/card.tsx apps/demo/src/components/card.tsx
@@ -502,7 +502,7 @@ Update `apps/demo/src/components/separator.tsx`:
 // Same — import { cn } from '@/lib/utils' already works
 ```
 
-- [ ] **Step 10: Install demo dependencies and verify dev server starts**
+- [x] **Step 10: Install demo dependencies and verify dev server starts**
 
 ```bash
 cd /path/to/root && pnpm install
@@ -511,7 +511,7 @@ cd apps/demo && pnpm dev
 
 Expected: Vite dev server starts, demo page renders at `http://localhost:5173` with working time range picker.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add apps/demo/
