@@ -95,13 +95,13 @@ git commit -m "chore: scaffold pnpm monorepo workspace root"
 - Move: `components/ui/button.tsx` → `packages/time-range-picker/src/ui/button.tsx`
 - Create: `packages/time-range-picker/src/index.ts`
 
-- [ ] **Step 1: Create directory structure**
+- [x] **Step 1: Create directory structure**
 
 ```bash
 mkdir -p packages/time-range-picker/src/ui
 ```
 
-- [ ] **Step 2: Create library package.json**
+- [x] **Step 2: Create library package.json**
 
 ```json
 {
@@ -153,7 +153,7 @@ mkdir -p packages/time-range-picker/src/ui
 }
 ```
 
-- [ ] **Step 3: Create library tsconfig.json**
+- [x] **Step 3: Create library tsconfig.json**
 
 No `@/` path alias — the library uses relative imports exclusively.
 
@@ -180,7 +180,7 @@ No `@/` path alias — the library uses relative imports exclusively.
 
 All imports in the library files will be converted to relative paths (no `@/` aliases). This makes the package portable and avoids any alias resolution issues. The `@/` alias is NOT used in the library — only the demo app uses it.
 
-- [ ] **Step 4: Create vitest.config.ts**
+- [x] **Step 4: Create vitest.config.ts**
 
 ```typescript
 import { defineConfig } from "vitest/config";
@@ -197,7 +197,7 @@ export default defineConfig({
 
 No `@` alias needed — all library imports use relative paths.
 
-- [ ] **Step 5: Move and update source files**
+- [x] **Step 5: Move and update source files**
 
 Copy files to their new locations:
 
@@ -212,7 +212,7 @@ cp components/ui/badge.tsx packages/time-range-picker/src/ui/badge.tsx
 cp components/ui/button.tsx packages/time-range-picker/src/ui/button.tsx
 ```
 
-- [ ] **Step 6: Update import paths in all moved library files**
+- [x] **Step 6: Update import paths in all moved library files**
 
 All files currently use `@/lib/utils` and `@/components/ui/*` path aliases. Since the library's `@` alias points to the package root and files now live under `src/`, we need to use relative imports instead (more portable, no alias dependency):
 
@@ -276,7 +276,7 @@ import { cn } from '../utils'
 // NEW: (stays the same — already uses relative import)
 ```
 
-- [ ] **Step 7: Create barrel export `src/index.ts`**
+- [x] **Step 7: Create barrel export `src/index.ts`**
 
 ```typescript
 export { TimeRangePicker } from "./time-range-picker";
@@ -293,7 +293,7 @@ export { Badge, badgeVariants } from "./ui/badge";
 export { Button, buttonVariants } from "./ui/button";
 ```
 
-- [ ] **Step 8: Install library dependencies and run existing tests**
+- [x] **Step 8: Install library dependencies and run existing tests**
 
 ```bash
 cd packages/time-range-picker && pnpm install
@@ -302,7 +302,7 @@ cd packages/time-range-picker && pnpm install
 Run: `cd packages/time-range-picker && pnpm test`
 Expected: All 68 existing tests pass.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add packages/time-range-picker/
