@@ -779,6 +779,52 @@ export function pauseTimeRange(
   };
 }
 
+function getShiftDurationMs(range: ResolvedTimeRange): number {
+  const durationMs = range.end.getTime() - range.start.getTime();
+
+  if (!hasExplicitTime(range.start) && isEndOfDayDate(range.end)) {
+    return durationMs + 1;
+  }
+
+  return durationMs;
+}
+
+export function canShiftTimeRangeForward(
+  range: TimeRange,
+  referenceDate: Date = new Date(),
+): boolean {
+  const resolved = resolveTimeRange(range, referenceDate);
+  const shiftDurationMs = getShiftDurationMs(resolved);
+
+  return resolved.end.getTime() + shiftDurationMs <= referenceDate.getTime();
+}
+
+export function shiftTimeRange(
+  range: TimeRange,
+  direction: "backward" | "forward",
+  referenceDate: Date = new Date(),
+): StaticTimeRange {
+  const resolved = resolveTimeRange(range, referenceDate);
+  const shiftDurationMs = getShiftDurationMs(resolved);
+  const directionMultiplier = direction === "backward" ? -1 : 1;
+
+  if (direction === "forward" && resolved.end.getTime() + shiftDurationMs > referenceDate.getTime()) {
+    return {
+      mode: "static",
+      start: resolved.start,
+      end: resolved.end,
+      isLive: false,
+    };
+  }
+
+  return {
+    mode: "static",
+    start: new Date(resolved.start.getTime() + shiftDurationMs * directionMultiplier),
+    end: new Date(resolved.end.getTime() + shiftDurationMs * directionMultiplier),
+    isLive: false,
+  };
+}
+
 export function formatRangeDisplay(
   range: ResolvedTimeRange | LegacyTimeRange,
   optionsOrUse24Hour?: boolean | TimeRangeOptions,

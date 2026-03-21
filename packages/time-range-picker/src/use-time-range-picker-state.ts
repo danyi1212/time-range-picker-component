@@ -1,11 +1,13 @@
 import * as React from "react";
 import {
+  canShiftTimeRangeForward,
   formatDuration,
   formatInputDisplay,
   getFilteredPresets,
   parseTimeRange,
   pauseTimeRange,
   resolveTimeRange,
+  shiftTimeRange,
   type TimeRange,
 } from "./time-range";
 import type { TimeRangePickerProps } from "./time-range-picker.types";
@@ -145,6 +147,34 @@ export function useTimeRangePickerState({
     [onChange, resolvedValue, value],
   );
 
+  const handleShiftBackward = React.useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      if (!value) {
+        return;
+      }
+
+      onChange?.(shiftTimeRange(value, "backward", new Date()));
+    },
+    [onChange, value],
+  );
+
+  const handleShiftForward = React.useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      if (!value) {
+        return;
+      }
+
+      onChange?.(shiftTimeRange(value, "forward", new Date()));
+    },
+    [onChange, value],
+  );
+
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent) => {
       if (event.key === "Enter" && parsedFromInput) {
@@ -209,6 +239,8 @@ export function useTimeRangePickerState({
   const resolvedDuration =
     resolvedValue && formatDuration(resolvedValue.start, resolvedValue.end, timeRangeOptions);
 
+  const canShiftForward = value ? canShiftTimeRangeForward(value, new Date()) : false;
+
   const parsedDuration =
     resolvedParsedFromInput &&
     formatDuration(
@@ -231,6 +263,7 @@ export function useTimeRangePickerState({
     filteredPresets,
     placeholderText,
     resolvedDuration,
+    canShiftForward,
     parsedDuration,
     handleInputChange,
     handleInputClick,
@@ -238,6 +271,8 @@ export function useTimeRangePickerState({
     handleSelectParsed,
     handleClear,
     handlePause,
+    handleShiftBackward,
+    handleShiftForward,
     handleKeyDown,
     handleFocus,
     handleBlur,
