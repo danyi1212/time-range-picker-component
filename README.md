@@ -49,6 +49,7 @@ npx shadcn@latest add popover command badge button
 import { useState } from "react";
 import { TimeRangePicker } from "@/components/time-range-picker";
 import { TimeRange } from "@/lib/time-range";
+import { enGB } from "date-fns/locale";
 
 export function MyComponent() {
   const [range, setRange] = useState<TimeRange | null>(null);
@@ -58,6 +59,9 @@ export function MyComponent() {
       value={range}
       onChange={setRange}
       clockFormat="24h"
+      locale={enGB}
+      weekStartsOn={1}
+      labels={{ now: "live" }}
       placeholder="Search time range..."
     />
   );
@@ -73,6 +77,13 @@ export function MyComponent() {
 | `placeholder` | `string` | `"Search time range..."` | Input placeholder text |
 | `className` | `string` | `undefined` | Additional CSS classes |
 | `clockFormat` | `"12h" \| "24h"` | `"24h"` | Clock display format |
+| `locale` | `Locale` | `undefined` | `date-fns` locale used for formatting |
+| `weekStartsOn` | `0 \| 1 \| ... \| 6` | `1` | First day of week for week-based presets |
+| `labels` | `Partial<TimeRangeLabels>` | `undefined` | Override built-in labels like `now` |
+| `formatPatterns` | `Partial<TimeRangeFormatPatterns>` | `undefined` | Override the `date-fns` format tokens used by the picker |
+| `presets` | `TimeRangePreset[]` | `undefined` | Add or replace preset definitions |
+| `includeDefaultPresets` | `boolean` | `true` | Include built-in presets alongside custom ones |
+| `examples` | `string[]` | built-in examples | Customize the example strings shown in the popover |
 
 ## Types
 
@@ -85,6 +96,12 @@ interface TimeRange {
 }
 
 type ClockFormat = "12h" | "24h";
+
+interface TimeRangeLabels {
+  now: string;
+  today: string;
+  yesterday: string;
+}
 ```
 
 ## Utilities
@@ -108,6 +125,23 @@ const duration = formatDuration(range.start, range.end);
 
 // Format a display string like "Today, 14:00 - 17:00"
 const display = formatRangeDisplay(range, true);
+```
+
+All parsing and formatting helpers now accept an optional `TimeRangeOptions` object as their last argument, so you can keep the picker and your own utility calls aligned:
+
+```ts
+import { formatRangeDisplay, parseTimeRange } from "@/lib/time-range";
+import { enGB } from "date-fns/locale";
+
+const options = {
+  clockFormat: "24h" as const,
+  locale: enGB,
+  weekStartsOn: 1 as const,
+  labels: { now: "live" },
+};
+
+const range = parseTimeRange("this week", new Date(), options);
+const display = range ? formatRangeDisplay(range, options) : "";
 ```
 
 ## Development

@@ -723,6 +723,62 @@ describe("getPresets", () => {
     expect(withShortcuts.some((p) => p.shortcut === "7d")).toBe(true);
     expect(withShortcuts.some((p) => p.shortcut === "30d")).toBe(true);
   });
+
+  test("respects custom weekStartsOn when building presets", () => {
+    const ref = new Date("2024-03-15T12:00:00");
+    const thisWeek = getPresets({ weekStartsOn: 0 }).find((preset) => preset.label === "This week");
+    expect(thisWeek).toBeDefined();
+    expect(thisWeek?.getRange(ref).start.getTime()).toBe(
+      startOfWeek(ref, { weekStartsOn: 0 }).getTime(),
+    );
+  });
+
+  test("can replace default presets with a custom preset list", () => {
+    const customPreset = {
+      label: "Business hours",
+      value: "business hours",
+      getRange: (referenceDate = createReferenceDate()) => ({
+        mode: "static" as const,
+        start: setMinutes(setHours(referenceDate, 9), 0),
+        end: setMinutes(setHours(referenceDate, 17), 0),
+        isLive: false,
+      }),
+      getHint: () => "09:00 - 17:00",
+    };
+
+    const presets = getPresets({
+      includeDefaultPresets: false,
+      presets: [customPreset],
+    });
+
+    expect(presets).toHaveLength(1);
+    expect(presets[0]?.label).toBe("Business hours");
+  });
+});
+
+describe("customization options", () => {
+  test("supports custom labels when formatting live ranges", () => {
+    const start = new Date("2024-03-15T09:30:00");
+    const end = new Date("2024-03-15T12:30:00");
+    const result = formatInputDisplay(
+      { start, end, isLive: true },
+      { labels: { now: "live" }, clockFormat: "24h" },
+    );
+
+    expect(result).toBe("09:30 - live");
+  });
+
+  test("supports custom format patterns", () => {
+    const start = new Date("2024-03-15T09:30:00");
+    const end = new Date("2024-03-15T12:30:00");
+    const result = formatRangeDisplay(
+      { start, end, isLive: false },
+      { clockFormat: "24h", formatPatterns: { time: "HH.mm" } },
+    );
+
+    expect(result).toContain("09.30");
+    expect(result).toContain("12.30");
+  });
 });
 
 // Integration tests
