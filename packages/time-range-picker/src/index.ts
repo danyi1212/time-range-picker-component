@@ -1,12 +1,19 @@
 export { TimeRangePicker } from "./time-range-picker";
 export type {
+  TimeRangePickerProps,
+} from "./time-range-picker";
+export type {
   TimeRange,
   TimeRangePreset,
   ClockFormat,
   RelativeDuration,
   RelativeDurationUnit,
+  TimeRangeOptions,
+  TimeRangeLabels,
+  TimeRangeFormatPatterns,
 } from "./time-range";
 export {
+  DEFAULT_TIME_RANGE_EXAMPLES,
   parseTimeRange,
   formatDuration,
   formatRangeDisplay,

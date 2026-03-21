@@ -2,6 +2,7 @@ import * as React from "react";
 import { TimeRangePicker } from "@danyi/time-range-picker";
 import {
   TimeRange,
+  TimeRangePreset,
   formatDuration,
   formatRangeDisplay,
   ClockFormat,
@@ -11,11 +12,15 @@ import { Badge, Button } from "@danyi/time-range-picker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/card";
 import { Separator } from "@/components/separator";
 import { Clock, CalendarDays, Timer, Code, Moon, Sun } from "lucide-react";
+import { enGB, enUS } from "date-fns/locale";
 
 export default function App() {
   const [selectedRange, setSelectedRange] = React.useState<TimeRange | null>(null);
   const [isDark, setIsDark] = React.useState(false);
   const [clockFormat, setClockFormat] = React.useState<ClockFormat>("24h");
+  const [weekStartsOn, setWeekStartsOn] = React.useState<0 | 1>(1);
+  const [localeKey, setLocaleKey] = React.useState<"en-US" | "en-GB">("en-US");
+  const [useCustomPresets, setUseCustomPresets] = React.useState(false);
   const [liveReferenceTime, setLiveReferenceTime] = React.useState(() => new Date());
 
   React.useEffect(() => {
@@ -32,6 +37,33 @@ export default function App() {
   const toggleClockFormat = () => {
     setClockFormat((prev) => (prev === "24h" ? "12h" : "24h"));
   };
+
+  const locale = localeKey === "en-GB" ? enGB : enUS;
+
+  const customPresets = React.useMemo<TimeRangePreset[]>(
+    () => [
+      {
+        label: "Business hours",
+        value: "business hours",
+        shortcut: "biz",
+        getRange: (referenceDate = new Date()) => {
+          const start = new Date(referenceDate);
+          start.setHours(9, 0, 0, 0);
+          const end = new Date(referenceDate);
+          end.setHours(17, 0, 0, 0);
+          return {
+            mode: "static",
+            start,
+            end,
+            label: "Business hours",
+            isLive: false,
+          };
+        },
+        getHint: () => "09:00 - 17:00",
+      },
+    ],
+    [],
+  );
 
   React.useEffect(() => {
     if (!selectedRange?.isLive) {
@@ -86,6 +118,30 @@ export default function App() {
             >
               {clockFormat === "24h" ? "24h" : "12h"}
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setWeekStartsOn((prev) => (prev === 1 ? 0 : 1))}
+              className="font-mono text-xs"
+            >
+              Week {weekStartsOn === 1 ? "Mon" : "Sun"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocaleKey((prev) => (prev === "en-US" ? "en-GB" : "en-US"))}
+              className="font-mono text-xs"
+            >
+              {localeKey}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setUseCustomPresets((prev) => !prev)}
+              className="font-mono text-xs"
+            >
+              {useCustomPresets ? "Preset+" : "Preset-"}
+            </Button>
             <Button variant="outline" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
@@ -109,6 +165,17 @@ export default function App() {
               onChange={setSelectedRange}
               placeholder="Search time range..."
               clockFormat={clockFormat}
+              locale={locale}
+              weekStartsOn={weekStartsOn}
+              labels={{ now: "now" }}
+              presets={useCustomPresets ? customPresets : undefined}
+              examples={[
+                "3h",
+                "Mar 3 - Mar 13",
+                "14:00 - 16:30",
+                "last friday",
+                "business hours",
+              ]}
             />
           </CardContent>
         </Card>
@@ -127,7 +194,11 @@ export default function App() {
                 )}
               </CardTitle>
               <CardDescription>
-                {formatRangeDisplay(displayRange, clockFormat === "24h")}
+                {formatRangeDisplay(displayRange, {
+                  clockFormat,
+                  locale,
+                  weekStartsOn,
+                })}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -136,7 +207,11 @@ export default function App() {
                 <Timer className="size-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Duration:</span>
                 <Badge variant="secondary" className="font-mono">
-                  {formatDuration(displayRange.start, displayRange.end)}
+                  {formatDuration(displayRange.start, displayRange.end, {
+                    clockFormat,
+                    locale,
+                    weekStartsOn,
+                  })}
                 </Badge>
               </div>
 

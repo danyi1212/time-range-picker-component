@@ -270,4 +270,50 @@ describe("TimeRangePicker", () => {
     const input12 = screen.getByRole("textbox") as HTMLInputElement;
     expect(input12.placeholder).toContain("2:00 PM");
   });
+
+  test("renders custom examples", async () => {
+    render(<TimeRangePicker examples={["business hours", "past quarter"]} />);
+    const input = screen.getByPlaceholderText("Search time range...");
+    fireEvent.focus(input);
+
+    await waitFor(() => {
+      expect(screen.getByText("business hours")).toBeInTheDocument();
+      expect(screen.getByText("past quarter")).toBeInTheDocument();
+    });
+  });
+
+  test("uses custom presets when defaults are disabled", async () => {
+    const onChange = vi.fn();
+    render(
+      <TimeRangePicker
+        onChange={onChange}
+        includeDefaultPresets={false}
+        presets={[
+          {
+            label: "Business hours",
+            value: "business hours",
+            getRange: (referenceDate = new Date("2024-03-15T12:00:00")) => ({
+              mode: "static",
+              start: new Date("2024-03-15T09:00:00"),
+              end: new Date("2024-03-15T17:00:00"),
+              label: "Business hours",
+              isLive: false,
+            }),
+            getHint: () => "09:00 - 17:00",
+          },
+        ]}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText("Search time range...");
+    fireEvent.focus(input);
+
+    await waitFor(() => {
+      expect(screen.getByText("Business hours")).toBeInTheDocument();
+      expect(screen.queryByText("Past 1 hour")).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Business hours"));
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
 });
