@@ -7,6 +7,13 @@ import type {
   TimeRangePreset,
 } from "./time-range";
 
+export interface TimeRangePickerControlLabels {
+  shiftBackward?: string | ((duration: string) => string);
+  shiftForward?: string | ((duration: string) => string);
+  pause?: string;
+  cannotShiftForward?: string;
+}
+
 export interface TimeRangePickerProps {
   value?: TimeRange | null;
   onChange?: (range: TimeRange | null) => void;
@@ -20,4 +27,7 @@ export interface TimeRangePickerProps {
   presets?: TimeRangePreset[];
   includeDefaultPresets?: boolean;
   examples?: string[];
+  showShiftControls?: boolean;
+  showPauseControl?: boolean;
+  controlLabels?: TimeRangePickerControlLabels;
 }

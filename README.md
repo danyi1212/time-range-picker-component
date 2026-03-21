@@ -9,6 +9,7 @@ A [shadcn/ui](https://ui.shadcn.com) component for selecting time ranges with na
 - Natural language parsing — type "past 3 hours", "last friday", or "Mar 1 - Mar 15"
 - Shortcut syntax — `3h`, `30m`, `7d`, `2w`, `1mo`
 - Built-in presets — today, yesterday, this week, last month, and more
+- Inline range controls — step backward/forward by the current duration and pause live ranges
 - 12h / 24h clock format support
 - Accessible — keyboard navigation, screen reader labels
 - Dark mode support
@@ -84,6 +85,9 @@ export function MyComponent() {
 | `presets` | `TimeRangePreset[]` | `undefined` | Add or replace preset definitions |
 | `includeDefaultPresets` | `boolean` | `true` | Include built-in presets alongside custom ones |
 | `examples` | `string[]` | built-in examples | Customize the example strings shown in the popover |
+| `showShiftControls` | `boolean` | `true` | Show or hide the back/forward step controls |
+| `showPauseControl` | `boolean` | `true` | Show or hide the pause control for live ranges |
+| `controlLabels` | `TimeRangePickerControlLabels` | `undefined` | Override tooltip copy for range controls |
 
 ## Types
 
@@ -102,6 +106,40 @@ interface TimeRangeLabels {
   today: string;
   yesterday: string;
 }
+
+interface TimeRangePickerControlLabels {
+  shiftBackward?: string | ((duration: string) => string);
+  shiftForward?: string | ((duration: string) => string);
+  pause?: string;
+  cannotShiftForward?: string;
+}
+```
+
+## Range Controls
+
+When a value is selected, the picker shows inline controls next to the duration badge:
+
+- Back shifts the selected window backward by the current resolved duration.
+- Pause freezes a live range into a static snapshot.
+- Forward shifts a historical window forward by the same duration.
+
+Forward is disabled when the next step would extend past `now`. Shifting a live range creates a static range so the stepped window stays fixed.
+
+You can hide those controls or customize their tooltip copy:
+
+```tsx
+<TimeRangePicker
+  value={range}
+  onChange={setRange}
+  showShiftControls
+  showPauseControl
+  controlLabels={{
+    shiftBackward: (duration) => `Back ${duration}`,
+    shiftForward: (duration) => `Forward ${duration}`,
+    pause: "Pause updates",
+    cannotShiftForward: "At live edge",
+  }}
+/>
 ```
 
 ## Utilities

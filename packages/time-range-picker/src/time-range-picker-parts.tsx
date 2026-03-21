@@ -18,6 +18,7 @@ import {
   type TimeRangeOptions,
   type TimeRangePreset,
 } from "./time-range";
+import type { TimeRangePickerControlLabels } from "./time-range-picker.types";
 
 interface PickerInputProps {
   value?: TimeRange | null;
@@ -30,6 +31,9 @@ interface PickerInputProps {
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onFocus: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
+  showShiftControls: boolean;
+  showPauseControl: boolean;
+  controlLabels?: TimeRangePickerControlLabels;
   onShiftBackward: (event: React.MouseEvent) => void;
   onPause: (event: React.MouseEvent) => void;
   onShiftForward: (event: React.MouseEvent) => void;
@@ -48,6 +52,9 @@ export function PickerInput({
   onKeyDown,
   onFocus,
   onBlur,
+  showShiftControls,
+  showPauseControl,
+  controlLabels,
   onShiftBackward,
   onPause,
   onShiftForward,
@@ -55,6 +62,16 @@ export function PickerInput({
   onClear,
 }: PickerInputProps) {
   const shiftDurationLabel = resolvedDuration ?? "this range";
+  const shiftBackwardLabel =
+    typeof controlLabels?.shiftBackward === "function"
+      ? controlLabels.shiftBackward(shiftDurationLabel)
+      : controlLabels?.shiftBackward ?? `Move back ${shiftDurationLabel}`;
+  const shiftForwardLabel =
+    typeof controlLabels?.shiftForward === "function"
+      ? controlLabels.shiftForward(shiftDurationLabel)
+      : controlLabels?.shiftForward ?? `Move forward ${shiftDurationLabel}`;
+  const pauseLabel = controlLabels?.pause ?? "Freeze this range";
+  const cannotShiftForwardLabel = controlLabels?.cannotShiftForward ?? "Cannot go past now";
 
   return (
     <div className="relative">
@@ -86,23 +103,25 @@ export function PickerInput({
           <Badge variant="secondary" className="text-xs font-normal">
             {resolvedDuration}
           </Badge>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-5 text-muted-foreground hover:text-foreground"
-                onClick={onShiftBackward}
-                onMouseDown={(event) => event.preventDefault()}
-                tabIndex={-1}
-              >
-                <ChevronLeft className="size-3" />
-                <span className="sr-only">Shift range backward</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{`Move back ${shiftDurationLabel}`}</TooltipContent>
-          </Tooltip>
-          {value.isLive && (
+          {showShiftControls && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-5 text-muted-foreground hover:text-foreground"
+                  onClick={onShiftBackward}
+                  onMouseDown={(event) => event.preventDefault()}
+                  tabIndex={-1}
+                >
+                  <ChevronLeft className="size-3" />
+                  <span className="sr-only">Shift range backward</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{shiftBackwardLabel}</TooltipContent>
+            </Tooltip>
+          )}
+          {value.isLive && showPauseControl && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -117,32 +136,32 @@ export function PickerInput({
                   <span className="sr-only">Pause live range</span>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Freeze this range</TooltipContent>
+              <TooltipContent>{pauseLabel}</TooltipContent>
             </Tooltip>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-5 text-muted-foreground hover:text-foreground disabled:text-muted-foreground/50"
-                  onClick={onShiftForward}
-                  onMouseDown={(event) => event.preventDefault()}
-                  tabIndex={-1}
-                  disabled={!canShiftForward}
-                >
-                  <ChevronRight className="size-3" />
-                  <span className="sr-only">Shift range forward</span>
-                </Button>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>
-              {canShiftForward
-                ? `Move forward ${shiftDurationLabel}`
-                : "Cannot go past now"}
-            </TooltipContent>
-          </Tooltip>
+          {showShiftControls && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-5 text-muted-foreground hover:text-foreground disabled:text-muted-foreground/50"
+                    onClick={onShiftForward}
+                    onMouseDown={(event) => event.preventDefault()}
+                    tabIndex={-1}
+                    disabled={!canShiftForward}
+                  >
+                    <ChevronRight className="size-3" />
+                    <span className="sr-only">Shift range forward</span>
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                {canShiftForward ? shiftForwardLabel : cannotShiftForwardLabel}
+              </TooltipContent>
+            </Tooltip>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

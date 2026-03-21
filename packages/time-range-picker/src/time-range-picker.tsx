@@ -20,6 +20,9 @@ export function TimeRangePicker({
   placeholder = "Search time range...",
   className,
   examples = DEFAULT_TIME_RANGE_EXAMPLES,
+  showShiftControls = true,
+  showPauseControl = true,
+  controlLabels,
   ...props
 }: TimeRangePickerProps) {
   const state = useTimeRangePickerState(props);
@@ -49,6 +52,9 @@ export function TimeRangePicker({
               onKeyDown={state.handleKeyDown}
               onFocus={state.handleFocus}
               onBlur={state.handleBlur}
+              showShiftControls={showShiftControls}
+              showPauseControl={showPauseControl}
+              controlLabels={controlLabels}
               onShiftBackward={state.handleShiftBackward}
               onPause={state.handlePause}
               onShiftForward={state.handleShiftForward}
