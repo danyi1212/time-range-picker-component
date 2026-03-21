@@ -2,9 +2,11 @@ import {
   parseTimeRange,
   formatDuration,
   formatRangeDisplay,
+  formatInputDisplay,
   getFilteredPresets,
   getPresets,
   formatPresetHint,
+  resolveTimeRange,
 } from "./time-range";
 import {
   startOfDay,
@@ -137,6 +139,73 @@ describe("formatRangeDisplay", () => {
   });
 });
 
+describe("formatInputDisplay", () => {
+  test("formats live same-day preset selection as time to now", () => {
+    const start = new Date("2024-03-15T09:30:00");
+    const end = new Date("2024-03-15T12:30:00");
+    const result = formatInputDisplay({ start, end, isLive: true }, true);
+    expect(result).toBe("09:30 - now");
+  });
+
+  test("formats live multi-day preset selection as dated time to now", () => {
+    const start = new Date("2024-03-14T12:30:00");
+    const end = new Date("2024-03-15T12:30:00");
+    const result = formatInputDisplay({ start, end, isLive: true }, true);
+    expect(result).toBe("Mar 14, 12:30 - now");
+  });
+});
+
+describe("resolveTimeRange", () => {
+  test("recomputes relative live ranges from the reference date", () => {
+    const referenceDate = new Date("2024-03-15T12:31:00");
+    const result = resolveTimeRange(
+      {
+        start: new Date("2024-03-15T12:00:00"),
+        end: new Date("2024-03-15T12:30:00"),
+        isLive: true,
+        liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
+      },
+      referenceDate,
+    );
+
+    expect(result.start.getTime()).toBe(new Date("2024-03-15T12:01:00").getTime());
+    expect(result.end.getTime()).toBe(referenceDate.getTime());
+  });
+
+  test("recomputes calendar-start live ranges from the reference date", () => {
+    const referenceDate = new Date("2024-03-16T08:00:00");
+    const result = resolveTimeRange(
+      {
+        start: new Date("2024-03-15T00:00:00"),
+        end: new Date("2024-03-15T23:59:00"),
+        isLive: true,
+        liveRange: { mode: "calendarStart", unit: "day" },
+      },
+      referenceDate,
+    );
+
+    expect(result.start.getTime()).toBe(new Date("2024-03-16T00:00:00").getTime());
+    expect(result.end.getTime()).toBe(referenceDate.getTime());
+  });
+
+  test("recomputes anchored live ranges with a moving end only", () => {
+    const referenceDate = new Date("2024-03-15T12:31:00");
+    const start = new Date("2024-03-15T09:00:00");
+    const result = resolveTimeRange(
+      {
+        start,
+        end: new Date("2024-03-15T12:30:00"),
+        isLive: true,
+        liveRange: { mode: "anchored" },
+      },
+      referenceDate,
+    );
+
+    expect(result.start.getTime()).toBe(start.getTime());
+    expect(result.end.getTime()).toBe(referenceDate.getTime());
+  });
+});
+
 describe("formatPresetHint", () => {
   const ref = createReferenceDate();
 
@@ -186,6 +255,10 @@ describe("parseTimeRange", () => {
       expect(result).not.toBeNull();
       expect(result?.start.getTime()).toBe(subMinutes(ref, 30).getTime());
       expect(result?.isLive).toBe(true);
+      expect(result?.liveRange).toEqual({
+        mode: "relative",
+        duration: { value: 30, unit: "minute" },
+      });
     });
 
     test("parses hour shortcuts (1h)", () => {
@@ -200,6 +273,10 @@ describe("parseTimeRange", () => {
       expect(result).not.toBeNull();
       expect(result?.start.getTime()).toBe(subHours(ref, 3).getTime());
       expect(result?.isLive).toBe(true);
+      expect(result?.liveRange).toEqual({
+        mode: "relative",
+        duration: { value: 3, unit: "hour" },
+      });
     });
 
     test("parses hour shortcuts (24h)", () => {
@@ -272,6 +349,7 @@ describe("parseTimeRange", () => {
       expect(result).not.toBeNull();
       expect(result?.label).toBe("Today");
       expect(result?.isLive).toBe(true);
+      expect(result?.liveRange).toEqual({ mode: "calendarStart", unit: "day" });
     });
 
     test("parses 'yesterday'", () => {

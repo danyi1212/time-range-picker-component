@@ -25,12 +25,37 @@ import {
   isValid,
 } from "date-fns";
 
-export interface TimeRange {
+interface TimeRangeBase {
   start: Date;
   end: Date;
   label?: string;
-  isLive?: boolean; // true if end is "now" (live/flexible)
+  isLive?: boolean;
 }
+
+export type LiveRangeDetails =
+  | {
+      mode: "anchored";
+    }
+  | {
+      mode: "relative";
+      duration: RelativeDuration;
+    }
+  | {
+      mode: "calendarStart";
+      unit: "day" | "week" | "month";
+      weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    };
+
+export interface StaticTimeRange extends TimeRangeBase {
+  mode: "static";
+}
+
+export interface LiveTimeRange extends TimeRangeBase {
+  mode: "live";
+  liveRange: LiveRangeDetails;
+}
+
+export type TimeRange = StaticTimeRange | LiveTimeRange;
 
 export interface TimeRangePreset {
   label: string;
@@ -41,6 +66,41 @@ export interface TimeRangePreset {
 }
 
 export type ClockFormat = "12h" | "24h";
+export type RelativeDurationUnit = "minute" | "hour" | "day" | "week" | "month";
+
+export interface RelativeDuration {
+  value: number;
+  unit: RelativeDurationUnit;
+}
+
+export interface ResolvedTimeRange {
+  mode: "static" | "live";
+  start: Date;
+  end: Date;
+  label?: string;
+  isLive?: boolean;
+}
+
+type LegacyTimeRange = TimeRangeBase & {
+  mode?: "static" | "live";
+  liveRange?: LiveRangeDetails;
+};
+
+function getRangeMode(range: {
+  mode?: "static" | "live";
+  isLive?: boolean;
+  liveRange?: LiveRangeDetails;
+}): "static" | "live" {
+  if (range.mode) {
+    return range.mode;
+  }
+
+  if (range.isLive || range.liveRange) {
+    return "live";
+  }
+
+  return "static";
+}
 
 function formatTime(date: Date, use24Hour: boolean): string {
   return format(date, use24Hour ? "HH:mm" : "h:mm a");
@@ -48,6 +108,158 @@ function formatTime(date: Date, use24Hour: boolean): string {
 
 function formatShortDate(date: Date): string {
   return format(date, "MMM d");
+}
+
+function hasExplicitTime(date: Date): boolean {
+  return (
+    date.getHours() !== 0 ||
+    date.getMinutes() !== 0 ||
+    date.getSeconds() !== 0 ||
+    date.getMilliseconds() !== 0
+  );
+}
+
+function isEndOfDayDate(date: Date): boolean {
+  return (
+    date.getHours() === 23 &&
+    date.getMinutes() === 59 &&
+    date.getSeconds() === 59 &&
+    date.getMilliseconds() === 999
+  );
+}
+
+function subtractRelativeDuration(referenceDate: Date, duration: RelativeDuration): Date {
+  switch (duration.unit) {
+    case "minute":
+      return subMinutes(referenceDate, duration.value);
+    case "hour":
+      return subHours(referenceDate, duration.value);
+    case "day":
+      return subDays(referenceDate, duration.value);
+    case "week":
+      return subWeeks(referenceDate, duration.value);
+    case "month":
+      return subMonths(referenceDate, duration.value);
+  }
+}
+
+export function isLiveTimeRange(range: TimeRange): range is LiveTimeRange {
+  return getRangeMode(range) === "live";
+}
+
+export function isStaticTimeRange(range: TimeRange): range is StaticTimeRange {
+  return getRangeMode(range) === "static";
+}
+
+export function resolveTimeRange(
+  range: TimeRange | LegacyTimeRange,
+  referenceDate: Date = new Date(),
+): ResolvedTimeRange {
+  const mode = getRangeMode(range);
+
+  if (mode === "static") {
+    return {
+      mode: "static",
+      start: range.start,
+      end: range.end,
+      label: range.label,
+      isLive: false,
+    };
+  }
+
+  if (!range.liveRange || range.liveRange.mode === "anchored") {
+    return {
+      mode: "live",
+      start: range.start,
+      end: referenceDate,
+      label: range.label,
+      isLive: true,
+    };
+  }
+
+  if (range.liveRange.mode === "relative") {
+    return {
+      mode: "live",
+      start: subtractRelativeDuration(referenceDate, range.liveRange.duration),
+      end: referenceDate,
+      label: range.label,
+      isLive: true,
+    };
+  }
+
+  switch (range.liveRange.unit) {
+    case "day":
+      return {
+        mode: "live",
+        start: startOfDay(referenceDate),
+        end: referenceDate,
+        label: range.label,
+        isLive: true,
+      };
+    case "week":
+      return {
+        mode: "live",
+        start: startOfWeek(referenceDate, { weekStartsOn: range.liveRange.weekStartsOn ?? 1 }),
+        end: referenceDate,
+        label: range.label,
+        isLive: true,
+      };
+    case "month":
+      return {
+        mode: "live",
+        start: startOfMonth(referenceDate),
+        end: referenceDate,
+        label: range.label,
+        isLive: true,
+      };
+  }
+}
+
+export function resolveTimeRangeToIso(range: TimeRange, referenceDate: Date = new Date()) {
+  const resolved = resolveTimeRange(range, referenceDate);
+  return {
+    mode: resolved.mode,
+    start: resolved.start.toISOString(),
+    end: resolved.end.toISOString(),
+    label: resolved.label,
+  };
+}
+
+export function getTimeRangeStart(range: TimeRange, referenceDate: Date = new Date()): Date {
+  return resolveTimeRange(range, referenceDate).start;
+}
+
+export function getTimeRangeEnd(range: TimeRange, referenceDate: Date = new Date()): Date {
+  return resolveTimeRange(range, referenceDate).end;
+}
+
+export function getTimeRangeDurationMs(
+  range: TimeRange,
+  referenceDate: Date = new Date(),
+): number {
+  const resolved = resolveTimeRange(range, referenceDate);
+  return resolved.end.getTime() - resolved.start.getTime();
+}
+
+export function getTimeRangeDuration(
+  range: TimeRange,
+  referenceDate: Date = new Date(),
+): string {
+  const resolved = resolveTimeRange(range, referenceDate);
+  return formatDuration(resolved.start, resolved.end);
+}
+
+export function pauseTimeRange(
+  range: TimeRange,
+  referenceDate: Date = new Date(),
+): StaticTimeRange {
+  const resolved = resolveTimeRange(range, referenceDate);
+  return {
+    mode: "static",
+    start: resolved.start,
+    end: resolved.end,
+    label: resolved.label,
+  };
 }
 
 export function formatDuration(start: Date, end: Date): string {
@@ -88,9 +300,13 @@ export function formatDuration(start: Date, end: Date): string {
   }
 }
 
-export function formatRangeDisplay(range: TimeRange, use24Hour: boolean = true): string {
-  const { start, end, isLive } = range;
-  const endLabel = isLive ? "now" : formatTime(end, use24Hour);
+export function formatRangeDisplay(
+  range: ResolvedTimeRange | LegacyTimeRange,
+  use24Hour: boolean = true,
+): string {
+  const { start, end } = range;
+  const mode = getRangeMode(range);
+  const endLabel = mode === "live" ? "now" : formatTime(end, use24Hour);
 
   // Check if it's a time-only range (same day)
   if (isSameDay(start, end)) {
@@ -107,18 +323,63 @@ export function formatRangeDisplay(range: TimeRange, use24Hour: boolean = true):
   const startFormat = isSameYear(start, new Date()) ? "MMM d" : "MMM d, yyyy";
   const endFormat = isSameYear(end, new Date()) ? "MMM d" : "MMM d, yyyy";
 
-  if (isLive) {
+  if (mode === "live") {
     return `${format(start, startFormat)} - now`;
   }
 
   return `${format(start, startFormat)} - ${format(end, endFormat)}`;
 }
 
-export function formatPresetHint(range: TimeRange, use24Hour: boolean): string {
-  const { start, end, isLive } = range;
+export function formatInputDisplay(
+  range: ResolvedTimeRange | LegacyTimeRange,
+  use24Hour: boolean = true,
+): string {
+  const { start, end } = range;
+  const mode = getRangeMode(range);
+
+  let display: string;
+
+  if (mode === "live") {
+    if (isSameDay(start, end)) {
+      display = `${formatTime(start, use24Hour)} - now`;
+    } else {
+      const startFormat = isSameYear(start, end)
+        ? use24Hour
+          ? "MMM d, HH:mm"
+          : "MMM d, h:mm a"
+        : use24Hour
+          ? "MMM d, yyyy, HH:mm"
+          : "MMM d, yyyy, h:mm a";
+      display = `${format(start, startFormat)} - now`;
+    }
+  } else {
+    const isWholeDayRange = !hasExplicitTime(start) && isEndOfDayDate(end);
+    if (!isWholeDayRange && !isSameDay(start, end)) {
+      const boundaryFormat = isSameYear(start, end)
+        ? use24Hour
+          ? "MMM d, HH:mm"
+          : "MMM d, h:mm a"
+        : use24Hour
+          ? "MMM d, yyyy, HH:mm"
+          : "MMM d, yyyy, h:mm a";
+      display = `${format(start, boundaryFormat)} - ${format(end, boundaryFormat)}`;
+    } else {
+      display = formatRangeDisplay(range, use24Hour);
+    }
+  }
+
+  return display;
+}
+
+export function formatPresetHint(
+  range: ResolvedTimeRange | LegacyTimeRange,
+  use24Hour: boolean,
+): string {
+  const { start, end } = range;
+  const mode = getRangeMode(range);
 
   // For live ranges ending at "now"
-  if (isLive) {
+  if (mode === "live") {
     // Same day - show time range
     if (isSameDay(start, end)) {
       return `${formatTime(start, use24Hour)} - now`;
@@ -147,6 +408,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Past 15 minutes",
         isLive: true,
+        liveRange: { mode: "relative", duration: { value: 15, unit: "minute" } },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -167,6 +429,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Past 30 minutes",
         isLive: true,
+        liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -188,6 +451,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Past 1 hour",
         isLive: true,
+        liveRange: { mode: "relative", duration: { value: 1, unit: "hour" } },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -208,6 +472,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Past 3 hours",
         isLive: true,
+        liveRange: { mode: "relative", duration: { value: 3, unit: "hour" } },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -228,6 +493,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Past 6 hours",
         isLive: true,
+        liveRange: { mode: "relative", duration: { value: 6, unit: "hour" } },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -248,6 +514,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Past 12 hours",
         isLive: true,
+        liveRange: { mode: "relative", duration: { value: 12, unit: "hour" } },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -268,6 +535,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Past 24 hours",
         isLive: true,
+        liveRange: { mode: "relative", duration: { value: 24, unit: "hour" } },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -288,6 +556,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "Today",
         isLive: true,
+        liveRange: { mode: "calendarStart", unit: "day" },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -372,6 +641,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "This week",
         isLive: true,
+        liveRange: { mode: "calendarStart", unit: "week", weekStartsOn: 1 },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -416,6 +686,7 @@ export function getPresets(): TimeRangePreset[] {
         end: new Date(),
         label: "This month",
         isLive: true,
+        liveRange: { mode: "calendarStart", unit: "month" },
       }),
       getHint: (use24Hour) =>
         formatPresetHint(
@@ -533,6 +804,12 @@ function parseShortcut(input: string, ref: Date): TimeRange | null {
     end: now,
     label: `Past ${value}${unit}`,
     isLive: true,
+    liveRange:
+      unit === "m" || unit === "min"
+        ? { mode: "relative", duration: { value, unit: "minute" } }
+        : unit === "h" || unit === "hr"
+          ? { mode: "relative", duration: { value, unit: "hour" } }
+          : { mode: "anchored" },
   };
 }
 
@@ -594,6 +871,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
         end: ref,
         label: `${format(startDate, "MMM d")} - now`,
         isLive: true,
+        liveRange: { mode: "anchored" },
       };
     }
   }
@@ -666,6 +944,7 @@ export function parseTimeRange(input: string, referenceDate?: Date): TimeRange |
           end: ref,
           label: input,
           isLive: true,
+          liveRange: { mode: "anchored" },
         };
       }
 

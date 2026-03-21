@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { TimeRangePicker } from "./time-range-picker";
 import type { TimeRange } from "./time-range";
@@ -169,6 +169,63 @@ describe("TimeRangePicker", () => {
     };
     render(<TimeRangePicker value={value} />);
     expect(screen.getByText("3h")).toBeInTheDocument();
+  });
+
+  test("selected preset value shows full range in the input instead of preset label", () => {
+    const value: TimeRange = {
+      start: new Date("2024-03-15T09:30:00"),
+      end: new Date("2024-03-15T12:30:00"),
+      label: "Past 3 hours",
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 3, unit: "hour" } },
+    };
+    render(<TimeRangePicker value={value} />);
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.placeholder).toBe("09:00 - now");
+    expect(screen.getByText("3h")).toBeInTheDocument();
+  });
+
+  test("relative live ranges update their displayed window over time", () => {
+    const value: TimeRange = {
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      label: "Past 30 minutes",
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
+    };
+    render(<TimeRangePicker value={value} />);
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.placeholder).toBe("11:30 - now");
+
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+
+    expect(input.placeholder).toBe("11:31 - now");
+    expect(screen.getByText("30 min")).toBeInTheDocument();
+  });
+
+  test("pause button freezes a live range into a static snapshot", () => {
+    const onChange = vi.fn();
+    const value: TimeRange = {
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      label: "Past 30 minutes",
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
+    };
+
+    render(<TimeRangePicker value={value} onChange={onChange} />);
+
+    const pauseButton = screen.getByRole("button", { name: /pause live range/i });
+    fireEvent.click(pauseButton);
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const nextValue = onChange.mock.calls[0][0] as TimeRange;
+    expect(nextValue.isLive).toBe(false);
+    expect(nextValue.liveRange).toBeUndefined();
+    expect(nextValue.start.getTime()).toBe(new Date("2024-03-15T11:30:00").getTime());
+    expect(nextValue.end.getTime()).toBe(new Date("2024-03-15T12:00:00").getTime());
   });
 
   test("controlled mode reflects external value changes", () => {
