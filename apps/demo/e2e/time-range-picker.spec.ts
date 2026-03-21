@@ -26,6 +26,12 @@ function docsResultHeading(page: Page) {
   return page.getByText("Selected Range", { exact: true });
 }
 
+function themeButton(page: Page, label?: "System" | "Dark" | "Light") {
+  return page.getByRole("button", {
+    name: label ? `Theme: ${label}` : /theme:/i,
+  });
+}
+
 function selectedRangeDetails(page: Page) {
   return page.getByText("Start ISO", { exact: true });
 }
@@ -238,7 +244,7 @@ test.describe("Time Range Picker Demo", () => {
     await input.fill("3h");
     await expect(page.getByText("Parsed Result")).toBeVisible();
 
-    await page.keyboard.press("Tab");
+    await page.getByRole("heading", { name: /natural language time range picker/i }).click();
 
     await expect(docsResultHeading(page)).toBeVisible();
     await expect(docsInput(page)).toHaveValue("");
@@ -277,22 +283,22 @@ test.describe("Time Range Picker Demo", () => {
     const html = page.locator("html");
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
-    const themeButton = page.getByRole("button", { name: /theme:/i });
+    const themeToggle = themeButton(page);
 
     await expect(html).not.toHaveClass(/dark/);
-    await expect(themeButton).toContainText("System");
+    await expect(themeButton(page, "System")).toBeVisible();
 
-    await themeButton.click();
+    await themeToggle.click();
     await expect(html).toHaveClass(/dark/);
-    await expect(themeButton).toContainText("Dark");
+    await expect(themeButton(page, "Dark")).toBeVisible();
 
-    await themeButton.click();
+    await themeToggle.click();
     await expect(html).not.toHaveClass(/dark/);
-    await expect(themeButton).toContainText("Light");
+    await expect(themeButton(page, "Light")).toBeVisible();
 
-    await themeButton.click();
+    await themeToggle.click();
     await expect(html).not.toHaveClass(/dark/);
-    await expect(themeButton).toContainText("System");
+    await expect(themeButton(page, "System")).toBeVisible();
   });
 
   test("system theme is used by default", async ({ page }) => {
