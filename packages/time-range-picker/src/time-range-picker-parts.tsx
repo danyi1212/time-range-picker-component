@@ -26,6 +26,7 @@ interface PickerInputProps {
   resolvedDuration?: string | null;
   inputRef: React.RefObject<HTMLInputElement | null>;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onClick: (event: React.MouseEvent<HTMLInputElement>) => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onFocus: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
@@ -40,6 +41,7 @@ export function PickerInput({
   resolvedDuration,
   inputRef,
   onChange,
+  onClick,
   onKeyDown,
   onFocus,
   onBlur,
@@ -56,6 +58,7 @@ export function PickerInput({
         type="text"
         value={inputValue}
         onChange={onChange}
+        onClick={onClick}
         onKeyDown={onKeyDown}
         onFocus={onFocus}
         onBlur={onBlur}
@@ -156,7 +159,7 @@ export function PresetGridSection({ presets, options, onSelect }: PresetGridSect
 
   return (
     <CommandGroup heading="Presets">
-      <div className="grid grid-cols-3 gap-1 p-1">
+      <div className="grid [grid-template-columns:repeat(auto-fit,minmax(min(12rem,100%),1fr))] gap-1 p-1">
         {presets.map((preset) => (
           <button
             key={preset.value}

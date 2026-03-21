@@ -37,22 +37,25 @@ export function TimeRangePicker({
     <div ref={state.containerRef} className={cn("relative", className)}>
       <Popover open={state.open} onOpenChange={state.setOpen}>
         <PopoverAnchor asChild>
-          <PickerInput
-            value={props.value}
-            inputValue={state.inputValue}
-            placeholder={inputPlaceholder}
-            resolvedDuration={state.resolvedDuration}
-            inputRef={state.inputRef}
-            onChange={state.handleInputChange}
-            onKeyDown={state.handleKeyDown}
-            onFocus={state.handleFocus}
-            onBlur={state.handleBlur}
-            onPause={state.handlePause}
-            onClear={state.handleClear}
-          />
+          <div>
+            <PickerInput
+              value={props.value}
+              inputValue={state.inputValue}
+              placeholder={inputPlaceholder}
+              resolvedDuration={state.resolvedDuration}
+              inputRef={state.inputRef}
+              onChange={state.handleInputChange}
+              onClick={state.handleInputClick}
+              onKeyDown={state.handleKeyDown}
+              onFocus={state.handleFocus}
+              onBlur={state.handleBlur}
+              onPause={state.handlePause}
+              onClear={state.handleClear}
+            />
+          </div>
         </PopoverAnchor>
         <PopoverContent
-          className="w-[var(--radix-popover-anchor-width)] p-0"
+          className="w-[var(--radix-popover-trigger-width)] min-w-max max-w-[var(--radix-popover-content-available-width)] p-0"
           align="start"
           onOpenAutoFocus={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => event.preventDefault()}

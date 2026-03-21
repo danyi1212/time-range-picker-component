@@ -104,6 +104,10 @@ export function useTimeRangePickerState({
     [],
   );
 
+  const handleInputClick = React.useCallback(() => {
+    setOpen(true);
+  }, []);
+
   const handleSelectParsed = React.useCallback(() => {
     if (parsedFromInput) {
       commitSelection(parsedFromInput);
@@ -229,6 +233,7 @@ export function useTimeRangePickerState({
     resolvedDuration,
     parsedDuration,
     handleInputChange,
+    handleInputClick,
     handleSelectPreset,
     handleSelectParsed,
     handleClear,
