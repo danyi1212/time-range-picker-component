@@ -48,6 +48,17 @@ vi.mock("./ui/popover", () => {
   };
 });
 
+vi.mock("./ui/tooltip", () => {
+  const React = require("react");
+  return {
+    Tooltip: ({ children }: any) => React.createElement(React.Fragment, null, children),
+    TooltipTrigger: ({ children, asChild }: any) =>
+      asChild ? React.Children.only(children) : React.createElement("span", null, children),
+    TooltipContent: ({ children }: any) =>
+      React.createElement("div", { "data-testid": "tooltip-content" }, children),
+  };
+});
+
 describe("TimeRangePicker", () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -175,6 +186,79 @@ describe("TimeRangePicker", () => {
       expect(screen.getByText("Presets")).toBeInTheDocument();
       expect(screen.getByText("Past 1 hour")).toBeInTheDocument();
     });
+  });
+
+  test("selecting a second preset after reopening replaces the previous preset", async () => {
+    function ControlledHarness() {
+      const [value, setValue] = React.useState<TimeRange | null>(null);
+      return <TimeRangePicker value={value} onChange={setValue} />;
+    }
+
+    render(<ControlledHarness />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+
+    fireEvent.focus(input);
+    await waitFor(() => {
+      expect(screen.getByText("Past 1 hour")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Past 1 hour"));
+
+    await waitFor(() => {
+      expect(input.placeholder).toBe("11:00 - now");
+    });
+    expect(screen.getByText("1h")).toBeInTheDocument();
+
+    fireEvent.click(input);
+
+    await waitFor(() => {
+      expect(screen.getByText("Past 3 hours")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Past 3 hours"));
+
+    await waitFor(() => {
+      expect(input.placeholder).toBe("09:00 - now");
+    });
+    expect(screen.getByText("3h")).toBeInTheDocument();
+    expect(screen.queryByText("1h")).not.toBeInTheDocument();
+  });
+
+  test("typing after reopening a selected preset starts from an empty input", async () => {
+    function ControlledHarness() {
+      const [value, setValue] = React.useState<TimeRange | null>(null);
+      return <TimeRangePicker value={value} onChange={setValue} />;
+    }
+
+    render(<ControlledHarness />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+
+    fireEvent.focus(input);
+    await waitFor(() => {
+      expect(screen.getByText("Past 1 hour")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("Past 1 hour"));
+
+    await waitFor(() => {
+      expect(input.placeholder).toBe("11:00 - now");
+    });
+
+    fireEvent.focus(input);
+
+    await waitFor(() => {
+      expect(screen.getByText("Presets")).toBeInTheDocument();
+    });
+    expect(input.value).toBe("");
+
+    fireEvent.change(input, { target: { value: "30m" } });
+
+    await waitFor(() => {
+      expect(input.value).toBe("30m");
+      expect(screen.getByText("Past 30 minutes")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Examples")).not.toBeInTheDocument();
   });
 
   test("blur commits a parsed value after the picker loses focus", async () => {
@@ -425,6 +509,71 @@ describe("TimeRangePicker", () => {
     expect(nextValue.end.getTime()).toBe(new Date("2024-03-15T12:00:00").getTime());
   });
 
+  test("can hide shift controls and the pause control independently", () => {
+    const value: TimeRange = {
+      mode: "live",
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
+    };
+
+    const { rerender } = render(
+      <TimeRangePicker value={value} showShiftControls={false} showPauseControl={false} />,
+    );
+
+    expect(screen.queryByRole("button", { name: /shift range backward/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /shift range forward/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /pause live range/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /clear selection/i })).toBeInTheDocument();
+
+    rerender(<TimeRangePicker value={value} showShiftControls={false} showPauseControl />);
+
+    expect(screen.queryByRole("button", { name: /shift range backward/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /shift range forward/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /pause live range/i })).toBeInTheDocument();
+  });
+
+  test("supports custom control tooltips", () => {
+    const value: TimeRange = {
+      mode: "live",
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
+    };
+
+    const { rerender } = render(
+      <TimeRangePicker
+        value={value}
+        controlLabels={{
+          shiftBackward: (duration) => `Back ${duration}`,
+          shiftForward: (duration) => `Forward ${duration}`,
+          pause: "Pause updates",
+          cannotShiftForward: "At live edge",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Back 30 min")).toBeInTheDocument();
+    expect(screen.getByText("Pause updates")).toBeInTheDocument();
+    expect(screen.getByText("At live edge")).toBeInTheDocument();
+
+    rerender(
+      <TimeRangePicker
+        value={{
+          mode: "static",
+          start: new Date("2024-03-15T10:30:00"),
+          end: new Date("2024-03-15T11:00:00"),
+          isLive: false,
+        }}
+        controlLabels={{ shiftForward: (duration) => `Forward ${duration}` }}
+      />,
+    );
+
+    expect(screen.getByText("Forward 30 min")).toBeInTheDocument();
+  });
+
   test("controlled mode reflects external value changes", () => {
     const value: TimeRange = {
       start: new Date("2024-03-15T11:30:00"),
@@ -443,7 +592,7 @@ describe("TimeRangePicker", () => {
     expect(screen.queryByText("3h")).not.toBeInTheDocument();
   });
 
-  test("focusing a selected value loads its display text without filtering presets", async () => {
+  test("focusing a selected value keeps the input empty and shows all presets", async () => {
     const value: TimeRange = {
       start: new Date("2024-03-15T09:30:00"),
       end: new Date("2024-03-15T12:30:00"),
@@ -462,14 +611,15 @@ describe("TimeRangePicker", () => {
     });
 
     await waitFor(() => {
-      expect(input.value).toBe("09:00 - now");
+      expect(screen.getByText("Presets")).toBeInTheDocument();
     });
 
+    expect(input.value).toBe("");
     expect(screen.getByText("Past 1 hour")).toBeInTheDocument();
     expect(screen.getByText("Examples")).toBeInTheDocument();
   });
 
-  test("focused controlled input tracks external value updates until the user types", async () => {
+  test("focused controlled input keeps placeholder in sync with external value updates", async () => {
     const initialValue: TimeRange = {
       start: new Date("2024-03-15T11:30:00"),
       end: new Date("2024-03-15T14:30:00"),
@@ -490,15 +640,16 @@ describe("TimeRangePicker", () => {
 
     expect(document.activeElement).toBe(input);
 
-    await waitFor(() => {
-      expect(input.value).toBe("Today, 11:30 - 14:30");
-    });
+    expect(input.value).toBe("");
+    expect(input.placeholder).toBe("Today, 11:30 - 14:30");
 
     rerender(<TimeRangePicker value={nextValue} />);
 
     await waitFor(() => {
-      expect(input.value).toBe("Today, 09:00 - 10:00");
+      expect(input.placeholder).toBe("Today, 09:00 - 10:00");
     });
+
+    expect(input.value).toBe("");
   });
 
   test("invalid input shows no results message", async () => {

@@ -69,70 +69,43 @@ export function MyComponent() {
 }
 ```
 
-## Props
+## API
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `value` | `TimeRange \| null` | `undefined` | The selected time range |
-| `onChange` | `(range: TimeRange \| null) => void` | `undefined` | Called when the selection changes |
-| `placeholder` | `string` | `"Search time range..."` | Input placeholder text |
-| `className` | `string` | `undefined` | Additional CSS classes |
-| `clockFormat` | `"12h" \| "24h"` | `"24h"` | Clock display format |
-| `locale` | `Locale` | `undefined` | `date-fns` locale used for formatting |
-| `weekStartsOn` | `0 \| 1 \| ... \| 6` | `1` | First day of week for week-based presets |
-| `labels` | `Partial<TimeRangeLabels>` | `undefined` | Override built-in labels like `now` |
-| `formatPatterns` | `Partial<TimeRangeFormatPatterns>` | `undefined` | Override the `date-fns` format tokens used by the picker |
-| `presets` | `TimeRangePreset[]` | `undefined` | Add or replace preset definitions |
-| `includeDefaultPresets` | `boolean` | `true` | Include built-in presets alongside custom ones |
-| `examples` | `string[]` | built-in examples | Customize the example strings shown in the popover |
-| `showShiftControls` | `boolean` | `true` | Show or hide the back/forward step controls |
-| `showPauseControl` | `boolean` | `true` | Show or hide the pause control for live ranges |
-| `controlLabels` | `TimeRangePickerControlLabels` | `undefined` | Override tooltip copy for range controls |
+### Package exports
 
-## Types
+- `TimeRangePicker`: React component. Import from `@danyi/time-range-picker`.
+- `DEFAULT_TIME_RANGE_EXAMPLES`: built-in example prompts. Import from `@danyi/time-range-picker`.
 
-```ts
-interface TimeRange {
-  start: Date;
-  end: Date;
-  label?: string;
-  isLive?: boolean; // true if end represents "now"
-}
+### TimeRangePicker props
 
-type ClockFormat = "12h" | "24h";
+- `value`: `TimeRange | null`. Default `undefined`. Controlled value.
+- `onChange`: `(range: TimeRange | null) => void`. Default `undefined`. Called when the value changes.
+- `placeholder`: `string`. Default `"Search time range..."`.
+- `className`: `string`. Default `undefined`.
+- `clockFormat`: `"12h" | "24h"`. Default `"24h"`.
+- `locale`: `Locale`. Default `undefined`.
+- `weekStartsOn`: `0 | 1 | 2 | 3 | 4 | 5 | 6`. Default `1`.
+- `labels`: `Partial<TimeRangeLabels>`. Default `undefined`.
+- `formatPatterns`: `Partial<TimeRangeFormatPatterns>`. Default `undefined`.
+- `presets`: `TimeRangePreset[]`. Default `undefined`.
+- `includeDefaultPresets`: `boolean`. Default `true`.
+- `examples`: `string[]`. Default built-in examples.
+- `showShiftControls`: `boolean`. Default `true`.
+- `showPauseControl`: `boolean`. Default `true`.
+- `controlLabels`: `TimeRangePickerControlLabels`. Default `undefined`.
 
-interface TimeRangeLabels {
-  now: string;
-  today: string;
-  yesterday: string;
-}
-
-interface TimeRangePickerControlLabels {
-  shiftBackward?: string | ((duration: string) => string);
-  shiftForward?: string | ((duration: string) => string);
-  pause?: string;
-  cannotShiftForward?: string;
-}
+```tsx
+<TimeRangePicker value={range} onChange={setRange} />
 ```
 
-## Range Controls
+```tsx
+import { enGB } from "date-fns/locale";
 
-When a value is selected, the picker shows inline controls next to the duration badge:
-
-- Back shifts the selected window backward by the current resolved duration.
-- Pause freezes a live range into a static snapshot.
-- Forward shifts a historical window forward by the same duration.
-
-Forward is disabled when the next step would extend past `now`. Shifting a live range creates a static range so the stepped window stays fixed.
-
-You can hide those controls or customize their tooltip copy:
+<TimeRangePicker locale={enGB} />
+```
 
 ```tsx
 <TimeRangePicker
-  value={range}
-  onChange={setRange}
-  showShiftControls
-  showPauseControl
   controlLabels={{
     shiftBackward: (duration) => `Back ${duration}`,
     shiftForward: (duration) => `Forward ${duration}`,
@@ -142,45 +115,41 @@ You can hide those controls or customize their tooltip copy:
 />
 ```
 
-## Utilities
+### Utility functions
 
-The `time-range` module also exports helpers you can use independently:
-
-```ts
-import {
-  parseTimeRange,
-  formatDuration,
-  formatRangeDisplay,
-  getPresets,
-  getFilteredPresets,
-} from "@/lib/time-range";
-
-// Parse natural language to a TimeRange
-const range = parseTimeRange("past 3 hours");
-
-// Format a duration string like "3h" or "2d 5h"
-const duration = formatDuration(range.start, range.end);
-
-// Format a display string like "Today, 14:00 - 17:00"
-const display = formatRangeDisplay(range, true);
-```
-
-All parsing and formatting helpers now accept an optional `TimeRangeOptions` object as their last argument, so you can keep the picker and your own utility calls aligned:
+- Root export `@danyi/time-range-picker`:
+  `parseTimeRange(input, referenceDate?, options?)`
+  `resolveTimeRange(range, referenceDate?)`
+  `formatDuration(start, end, options?)`
+  `formatRangeDisplay(range, options?)`
+  `formatInputDisplay(range, options?)`
+  `formatPresetHint(range, options?)`
+  `getPresets(options?)`
+  `getFilteredPresets(input, options?)`
+- Subpath export `@danyi/time-range-picker/time-range`:
+  `resolveTimeRangeToIso(range, referenceDate?)`
+  `getTimeRangeStart(range, referenceDate?)`
+  `getTimeRangeEnd(range, referenceDate?)`
+  `getTimeRangeDurationMs(range, referenceDate?)`
+  `getTimeRangeDuration(range, referenceDate?, options?)`
+  `pauseTimeRange(range, referenceDate?)`
+  `canShiftTimeRangeForward(range, referenceDate?)`
+  `shiftTimeRange(range, direction, referenceDate?)`
+  `isLiveTimeRange(range)`
+  `isStaticTimeRange(range)`
 
 ```ts
-import { formatRangeDisplay, parseTimeRange } from "@/lib/time-range";
-import { enGB } from "date-fns/locale";
-
-const options = {
-  clockFormat: "24h" as const,
-  locale: enGB,
-  weekStartsOn: 1 as const,
-  labels: { now: "live" },
-};
-
-const range = parseTimeRange("this week", new Date(), options);
-const display = range ? formatRangeDisplay(range, options) : "";
+const range = parseTimeRange("past 3 hours", new Date(), {
+  clockFormat: "24h",
+});
 ```
+
+### Exported types
+
+- Root package:
+  `TimeRangePickerProps`, `TimeRangePickerControlLabels`, `TimeRange`, `TimeRangePreset`, `ClockFormat`, `RelativeDuration`, `RelativeDurationUnit`, `TimeRangeOptions`, `TimeRangeLabels`, `TimeRangeFormatPatterns`
+- `@danyi/time-range-picker/time-range`:
+  `LiveRangeDetails`, `StaticTimeRange`, `LiveTimeRange`, `ResolvedTimeRange`
 
 ## Development
 
@@ -224,6 +193,30 @@ pnpm fmt:check
 # Build the shadcn registry JSON
 pnpm --filter @danyi/time-range-picker build:registry
 ```
+
+## Release Workflow
+
+Releases are managed with Changesets.
+
+```bash
+# create a release note for the package changes in your branch
+pnpm changeset
+
+# apply pending version bumps locally
+pnpm version-packages
+```
+
+When a changeset lands on `main`, GitHub Actions opens or updates a release PR. Merging that PR publishes `@danyi/time-range-picker` to npm with provenance enabled and creates the matching GitHub release.
+
+## Deployment Targets
+
+- `npm`: primary distribution channel for the compiled package in `packages/time-range-picker/dist`
+- `GitHub Releases`: automatic release history alongside npm publishes
+- `shadcn registry`: already served directly from this repository via `packages/time-range-picker/registry/time-range-picker.json`
+
+### Required Secrets
+
+No npm secret is required once npm trusted publishing is configured for this repository and workflow.
 
 ## License
 

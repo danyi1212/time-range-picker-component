@@ -69,10 +69,46 @@ Commit the updated `registry/time-range-picker.json` alongside your source chang
 
 1. Create a branch from `main`
 2. Make your changes
-3. Ensure all checks pass: `pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test`
-4. Open a PR against `main`
+3. If the package behavior changes, add a changeset: `pnpm changeset`
+4. Regenerate the registry JSON if component source changed: `pnpm --filter @danyi/time-range-picker build:registry`
+5. Ensure all checks pass: `pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test && pnpm test:e2e`
+6. Open a PR against `main`
 
 Please keep PRs focused — one feature or fix per PR.
+
+## Release workflow
+
+This project uses Changesets plus npm trusted publishing from GitHub Actions.
+
+### Contributor flow
+
+For any package change that should be released:
+
+```bash
+pnpm changeset
+```
+
+Choose the release type for `@danyi/time-range-picker` and describe the change in one short paragraph. Commit that generated file with your code changes.
+
+### Maintainer flow
+
+1. Merge a PR with at least one changeset into `main`.
+2. The `Release` GitHub Actions workflow updates or opens a release PR.
+3. Review the generated version bump and release notes.
+4. Merge the release PR.
+5. GitHub Actions publishes `@danyi/time-range-picker` to npm and creates the matching GitHub release.
+
+### npm trusted publishing setup
+
+The release workflow is configured for npm trusted publishing with GitHub Actions OIDC, not a stored `NPM_TOKEN`.
+
+Before the automated publish can work, a maintainer must configure the trusted publisher in npm for `@danyi/time-range-picker`:
+
+1. Open npm package settings for `@danyi/time-range-picker`.
+2. Add a trusted publisher for this GitHub repository and the `release.yml` workflow on the `main` branch.
+3. If npm requires an initial manual publish before trusted publishing can be attached, do that once, then enable the trusted publisher.
+
+After trusted publishing is configured, no npm credential secret is needed in GitHub Actions.
 
 ## Reporting issues
 

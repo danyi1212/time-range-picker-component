@@ -9,8 +9,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@danyi/time-range-picker": ["../../packages/time-range-picker/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
