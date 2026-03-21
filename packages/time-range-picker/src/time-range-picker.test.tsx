@@ -338,6 +338,93 @@ describe("TimeRangePicker", () => {
     expect(nextValue.end.getTime()).toBe(new Date("2024-03-15T12:00:00").getTime());
   });
 
+  test("shift backward button moves a static range by its current duration", () => {
+    const onChange = vi.fn();
+    const value: TimeRange = {
+      mode: "static",
+      start: new Date("2024-03-15T11:00:00"),
+      end: new Date("2024-03-15T12:30:00"),
+      isLive: false,
+    };
+
+    render(<TimeRangePicker value={value} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /shift range backward/i }));
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const nextValue = onChange.mock.calls[0][0] as TimeRange;
+    expect(nextValue.mode).toBe("static");
+    expect(nextValue.isLive).toBe(false);
+    expect(nextValue.start.getTime()).toBe(new Date("2024-03-15T09:30:00").getTime());
+    expect(nextValue.end.getTime()).toBe(new Date("2024-03-15T11:00:00").getTime());
+  });
+
+  test("shift backward button pauses and moves a live range by its resolved duration", () => {
+    const onChange = vi.fn();
+    const value: TimeRange = {
+      mode: "live",
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      label: "Past 30 minutes",
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
+    };
+
+    render(<TimeRangePicker value={value} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /shift range backward/i }));
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const nextValue = onChange.mock.calls[0][0] as TimeRange;
+    expect(nextValue.mode).toBe("static");
+    expect(nextValue.isLive).toBe(false);
+    expect(nextValue.start.getTime()).toBe(new Date("2024-03-15T11:00:00").getTime());
+    expect(nextValue.end.getTime()).toBe(new Date("2024-03-15T11:30:00").getTime());
+  });
+
+  test("shift forward button is disabled when the next window would exceed now", () => {
+    const onChange = vi.fn();
+    const value: TimeRange = {
+      mode: "live",
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      label: "Past 30 minutes",
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 30, unit: "minute" } },
+    };
+
+    render(<TimeRangePicker value={value} onChange={onChange} />);
+
+    const forwardButton = screen.getByRole("button", { name: /shift range forward/i });
+    expect(forwardButton).toBeDisabled();
+
+    fireEvent.click(forwardButton);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  test("shift forward button advances a historical range until it reaches now", () => {
+    const onChange = vi.fn();
+    const value: TimeRange = {
+      mode: "static",
+      start: new Date("2024-03-15T11:00:00"),
+      end: new Date("2024-03-15T11:30:00"),
+      isLive: false,
+    };
+
+    render(<TimeRangePicker value={value} onChange={onChange} />);
+
+    const forwardButton = screen.getByRole("button", { name: /shift range forward/i });
+    expect(forwardButton).toBeEnabled();
+
+    fireEvent.click(forwardButton);
+
+    const nextValue = onChange.mock.calls[0][0] as TimeRange;
+    expect(nextValue.mode).toBe("static");
+    expect(nextValue.isLive).toBe(false);
+    expect(nextValue.start.getTime()).toBe(new Date("2024-03-15T11:30:00").getTime());
+    expect(nextValue.end.getTime()).toBe(new Date("2024-03-15T12:00:00").getTime());
+  });
+
   test("controlled mode reflects external value changes", () => {
     const value: TimeRange = {
       start: new Date("2024-03-15T11:30:00"),

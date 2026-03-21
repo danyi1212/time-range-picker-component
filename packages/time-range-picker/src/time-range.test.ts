@@ -13,8 +13,10 @@ import {
   isLiveTimeRange,
   isStaticTimeRange,
   pauseTimeRange,
+  canShiftTimeRangeForward,
   resolveTimeRange,
   resolveTimeRangeToIso,
+  shiftTimeRange,
 } from "./time-range";
 import {
   startOfDay,
@@ -311,6 +313,99 @@ describe("type guards and helper accessors", () => {
       label: "Past 30 minutes",
       isLive: false,
     });
+  });
+
+  test("shifts timed ranges backward by their full duration", () => {
+    const referenceDate = createReferenceDate();
+    const shifted = shiftTimeRange(
+      {
+        mode: "static",
+        start: new Date("2024-03-15T11:00:00"),
+        end: new Date("2024-03-15T12:30:00"),
+        isLive: false,
+      },
+      "backward",
+      referenceDate,
+    );
+
+    expect(shifted.mode).toBe("static");
+    expect(shifted.isLive).toBe(false);
+    expect(shifted.start.getTime()).toBe(new Date("2024-03-15T09:30:00").getTime());
+    expect(shifted.end.getTime()).toBe(new Date("2024-03-15T11:00:00").getTime());
+  });
+
+  test("shifts whole-day ranges by full calendar boundaries", () => {
+    const referenceDate = createReferenceDate();
+    const shifted = shiftTimeRange(
+      {
+        mode: "static",
+        start: new Date("2024-03-14T00:00:00"),
+        end: new Date("2024-03-14T23:59:59.999"),
+        isLive: false,
+      },
+      "backward",
+      referenceDate,
+    );
+
+    expect(shifted.mode).toBe("static");
+    expect(shifted.isLive).toBe(false);
+    expect(shifted.start.getTime()).toBe(new Date("2024-03-13T00:00:00").getTime());
+    expect(shifted.end.getTime()).toBe(new Date("2024-03-13T23:59:59.999").getTime());
+  });
+
+  test("shifts live ranges from their resolved duration", () => {
+    const referenceDate = createReferenceDate();
+    const shifted = shiftTimeRange(
+      {
+        mode: "live",
+        start: subHours(referenceDate, 1),
+        end: referenceDate,
+        label: "Past 1 hour",
+        isLive: true,
+        liveRange: { mode: "relative", duration: { value: 1, unit: "hour" } },
+      },
+      "backward",
+      referenceDate,
+    );
+
+    expect(shifted.mode).toBe("static");
+    expect(shifted.isLive).toBe(false);
+    expect(shifted.start.getTime()).toBe(new Date("2024-03-15T12:30:00.000Z").getTime());
+    expect(shifted.end.getTime()).toBe(new Date("2024-03-15T13:30:00.000Z").getTime());
+  });
+
+  test("blocks forward shifts that would extend past now", () => {
+    const referenceDate = createReferenceDate();
+    const range = {
+      mode: "static" as const,
+      start: new Date("2024-03-15T13:45:00.000Z"),
+      end: new Date("2024-03-15T14:30:00.000Z"),
+      isLive: false,
+    };
+
+    expect(canShiftTimeRangeForward(range, referenceDate)).toBe(false);
+    const shifted = shiftTimeRange(range, "forward", referenceDate);
+    expect(shifted.mode).toBe("static");
+    expect(shifted.isLive).toBe(false);
+    expect(shifted.start.getTime()).toBe(range.start.getTime());
+    expect(shifted.end.getTime()).toBe(range.end.getTime());
+  });
+
+  test("allows forward shifts that land exactly on now", () => {
+    const referenceDate = createReferenceDate();
+    const range = {
+      mode: "static" as const,
+      start: new Date("2024-03-15T13:30:00.000Z"),
+      end: new Date("2024-03-15T14:00:00.000Z"),
+      isLive: false,
+    };
+
+    expect(canShiftTimeRangeForward(range, referenceDate)).toBe(true);
+    const shifted = shiftTimeRange(range, "forward", referenceDate);
+    expect(shifted.mode).toBe("static");
+    expect(shifted.isLive).toBe(false);
+    expect(shifted.start.getTime()).toBe(new Date("2024-03-15T14:00:00.000Z").getTime());
+    expect(shifted.end.getTime()).toBe(new Date("2024-03-15T14:30:00.000Z").getTime());
   });
 });
 

@@ -49,7 +49,10 @@ export function TimeRangePicker({
               onKeyDown={state.handleKeyDown}
               onFocus={state.handleFocus}
               onBlur={state.handleBlur}
+              onShiftBackward={state.handleShiftBackward}
               onPause={state.handlePause}
+              onShiftForward={state.handleShiftForward}
+              canShiftForward={state.canShiftForward}
               onClear={state.handleClear}
             />
           </div>

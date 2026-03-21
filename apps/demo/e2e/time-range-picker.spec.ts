@@ -20,6 +20,17 @@ function pickerList(page: Page) {
   return page.locator("[cmdk-list]").first();
 }
 
+function detailValue(page: Page, label: string) {
+  return page.locator(`xpath=(//div[normalize-space()="${label}"]/following-sibling::div[1])[1]`);
+}
+
+async function unixRange(page: Page) {
+  const start = Number(await detailValue(page, "Unix start").textContent());
+  const end = Number(await detailValue(page, "Unix end").textContent());
+
+  return { start, end };
+}
+
 test.describe("Time Range Picker Demo", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -246,6 +257,65 @@ test.describe("Time Range Picker Demo", () => {
     await expect(docsResultHeading(page)).toBeVisible();
     await expect(page.locator("[data-slot=badge]").filter({ hasText: "Live" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /pause live range/i })).toHaveCount(0);
+  });
+
+  test("shift controls move a live range backward and forward by its duration", async ({ page }) => {
+    const input = docsInput(page);
+    await input.click();
+    await input.fill("1h");
+    await page.keyboard.press("Enter");
+
+    await expect(docsResultHeading(page)).toBeVisible();
+
+    const initial = await unixRange(page);
+    const duration = initial.end - initial.start;
+    const backwardButton = page.getByRole("button", { name: /shift range backward/i });
+    const forwardButton = page.getByRole("button", { name: /shift range forward/i });
+
+    await expect(forwardButton).toBeDisabled();
+
+    await backwardButton.click();
+
+    await expect(page.locator("[data-slot=badge]").filter({ hasText: "Live" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /pause live range/i })).toHaveCount(0);
+
+    const shiftedBack = await unixRange(page);
+    expect(shiftedBack.end - shiftedBack.start).toBe(duration);
+    expect(Math.abs(shiftedBack.start - (initial.start - duration))).toBeLessThanOrEqual(5_000);
+    expect(Math.abs(shiftedBack.end - (initial.end - duration))).toBeLessThanOrEqual(5_000);
+
+    await expect(forwardButton).toBeEnabled();
+    await forwardButton.click();
+
+    const shiftedForward = await unixRange(page);
+    expect(shiftedForward.end - shiftedForward.start).toBe(duration);
+    expect(shiftedForward.end).toBeGreaterThanOrEqual(initial.end);
+    expect(shiftedForward.end - initial.end).toBeLessThanOrEqual(5_000);
+    await expect(forwardButton).toBeDisabled();
+  });
+
+  test("paused live ranges can still be shifted backward and forward", async ({ page }) => {
+    const input = docsInput(page);
+    await input.click();
+    await input.fill("1h");
+    await page.keyboard.press("Enter");
+
+    await expect(docsResultHeading(page)).toBeVisible();
+
+    await page.getByRole("button", { name: /pause live range/i }).click();
+    const paused = await unixRange(page);
+    const duration = paused.end - paused.start;
+    const backwardButton = page.getByRole("button", { name: /shift range backward/i });
+    const forwardButton = page.getByRole("button", { name: /shift range forward/i });
+
+    await backwardButton.click();
+    const shiftedBack = await unixRange(page);
+    expect(shiftedBack.start).toBe(paused.start - duration);
+    expect(shiftedBack.end).toBe(paused.end - duration);
+
+    await forwardButton.click();
+    const shiftedForward = await unixRange(page);
+    expect(shiftedForward).toEqual(paused);
   });
 
   test("playground supports custom presets and generated snippets", async ({ page }) => {

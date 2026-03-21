@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Calendar, ChevronRight, Clock, Pause, X } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Clock, Pause, X } from "lucide-react";
 import { cn } from "./utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -30,7 +30,10 @@ interface PickerInputProps {
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onFocus: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onShiftBackward: (event: React.MouseEvent) => void;
   onPause: (event: React.MouseEvent) => void;
+  onShiftForward: (event: React.MouseEvent) => void;
+  canShiftForward: boolean;
   onClear: (event: React.MouseEvent) => void;
 }
 
@@ -45,9 +48,14 @@ export function PickerInput({
   onKeyDown,
   onFocus,
   onBlur,
+  onShiftBackward,
   onPause,
+  onShiftForward,
+  canShiftForward,
   onClear,
 }: PickerInputProps) {
+  const shiftDurationLabel = resolvedDuration ?? "this range";
+
   return (
     <div className="relative">
       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
@@ -78,6 +86,22 @@ export function PickerInput({
           <Badge variant="secondary" className="text-xs font-normal">
             {resolvedDuration}
           </Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-5 text-muted-foreground hover:text-foreground"
+                onClick={onShiftBackward}
+                onMouseDown={(event) => event.preventDefault()}
+                tabIndex={-1}
+              >
+                <ChevronLeft className="size-3" />
+                <span className="sr-only">Shift range backward</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{`Move back ${shiftDurationLabel}`}</TooltipContent>
+          </Tooltip>
           {value.isLive && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -96,6 +120,29 @@ export function PickerInput({
               <TooltipContent>Freeze this range</TooltipContent>
             </Tooltip>
           )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-5 text-muted-foreground hover:text-foreground disabled:text-muted-foreground/50"
+                  onClick={onShiftForward}
+                  onMouseDown={(event) => event.preventDefault()}
+                  tabIndex={-1}
+                  disabled={!canShiftForward}
+                >
+                  <ChevronRight className="size-3" />
+                  <span className="sr-only">Shift range forward</span>
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              {canShiftForward
+                ? `Move forward ${shiftDurationLabel}`
+                : "Cannot go past now"}
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
