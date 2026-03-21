@@ -1,3 +1,4 @@
+import * as React from "react";
 import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { TimeRangePicker } from "./time-range-picker";
@@ -105,6 +106,22 @@ describe("TimeRangePicker", () => {
     await waitFor(() => {
       expect(screen.getByText("Parsed Result")).toBeInTheDocument();
     });
+    expect(screen.getAllByText("3h").length).toBeGreaterThan(0);
+  });
+
+  test("filters presets and hides examples once the user types", async () => {
+    render(<TimeRangePicker />);
+    const input = screen.getByPlaceholderText("Search time range...");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "past 30" } });
+
+    await waitFor(() => {
+      expect(screen.getByText("Past 30 minutes")).toBeInTheDocument();
+      expect(screen.getByText("Past 30 days")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText("Past 1 hour")).not.toBeInTheDocument();
+    expect(screen.queryByText("Examples")).not.toBeInTheDocument();
   });
 
   test("selects a preset and fires onChange", async () => {
@@ -133,6 +150,99 @@ describe("TimeRangePicker", () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     const range = onChange.mock.calls[0][0] as TimeRange;
     expect(range.isLive).toBe(true);
+  });
+
+  test("clicking the input after selection closes the popover reopens the preset list", async () => {
+    function ControlledHarness() {
+      const [value, setValue] = React.useState<TimeRange | null>(null);
+      return <TimeRangePicker value={value} onChange={setValue} />;
+    }
+
+    render(<ControlledHarness />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "3h" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.queryByText("Presets")).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(input);
+
+    await waitFor(() => {
+      expect(screen.getByText("Presets")).toBeInTheDocument();
+      expect(screen.getByText("Past 1 hour")).toBeInTheDocument();
+    });
+  });
+
+  test("blur commits a parsed value after the picker loses focus", async () => {
+    const onChange = vi.fn();
+    render(<TimeRangePicker onChange={onChange} />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "3h" } });
+
+    await waitFor(() => {
+      expect(screen.getByText("Parsed Result")).toBeInTheDocument();
+    });
+
+    fireEvent.blur(input);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect((onChange.mock.calls[0]?.[0] as TimeRange).label).toBe("Past 3 hours");
+    expect(input.value).toBe("");
+  });
+
+  test("blur clears invalid input without committing a value", async () => {
+    const onChange = vi.fn();
+    render(<TimeRangePicker onChange={onChange} />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "asdfghjkl" } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/could not parse/i)).toBeInTheDocument();
+    });
+
+    fireEvent.blur(input);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input.value).toBe("");
+  });
+
+  test("does not commit or reset when focus moves within the picker", async () => {
+    const onChange = vi.fn();
+    render(<TimeRangePicker onChange={onChange} />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "3h" } });
+
+    await waitFor(() => {
+      expect(screen.getByText("Past 3 hours")).toBeInTheDocument();
+    });
+
+    const presetButton = screen.getByText("Past 3 hours");
+    fireEvent.blur(input, { relatedTarget: presetButton });
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input.value).toBe("3h");
   });
 
   test("Escape key closes popover", async () => {
@@ -246,6 +356,64 @@ describe("TimeRangePicker", () => {
     expect(screen.queryByText("3h")).not.toBeInTheDocument();
   });
 
+  test("focusing a selected value loads its display text without filtering presets", async () => {
+    const value: TimeRange = {
+      start: new Date("2024-03-15T09:30:00"),
+      end: new Date("2024-03-15T12:30:00"),
+      isLive: true,
+      liveRange: { mode: "relative", duration: { value: 3, unit: "hour" } },
+    };
+
+    render(<TimeRangePicker value={value} />);
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+
+    expect(input.value).toBe("");
+    expect(input.placeholder).toBe("09:00 - now");
+
+    act(() => {
+      input.focus();
+    });
+
+    await waitFor(() => {
+      expect(input.value).toBe("09:00 - now");
+    });
+
+    expect(screen.getByText("Past 1 hour")).toBeInTheDocument();
+    expect(screen.getByText("Examples")).toBeInTheDocument();
+  });
+
+  test("focused controlled input tracks external value updates until the user types", async () => {
+    const initialValue: TimeRange = {
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T14:30:00"),
+      isLive: false,
+    };
+    const nextValue: TimeRange = {
+      start: new Date("2024-03-15T09:00:00"),
+      end: new Date("2024-03-15T10:00:00"),
+      isLive: false,
+    };
+
+    const { rerender } = render(<TimeRangePicker value={initialValue} />);
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+
+    act(() => {
+      input.focus();
+    });
+
+    expect(document.activeElement).toBe(input);
+
+    await waitFor(() => {
+      expect(input.value).toBe("Today, 11:30 - 14:30");
+    });
+
+    rerender(<TimeRangePicker value={nextValue} />);
+
+    await waitFor(() => {
+      expect(input.value).toBe("Today, 09:00 - 10:00");
+    });
+  });
+
   test("invalid input shows no results message", async () => {
     render(<TimeRangePicker />);
     const input = screen.getByPlaceholderText("Search time range...");
@@ -315,5 +483,56 @@ describe("TimeRangePicker", () => {
 
     fireEvent.click(screen.getByText("Business hours"));
     expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  test("merges custom presets with the defaults by default", async () => {
+    render(
+      <TimeRangePicker
+        presets={[
+          {
+            label: "Business hours",
+            value: "business hours",
+            shortcut: "biz",
+            getRange: () => ({
+              mode: "static",
+              start: new Date("2024-03-15T09:00:00"),
+              end: new Date("2024-03-15T17:00:00"),
+              label: "Business hours",
+              isLive: false,
+            }),
+            getHint: () => "09:00 - 17:00",
+          },
+        ]}
+      />,
+    );
+
+    const input = screen.getByRole("textbox");
+    fireEvent.focus(input);
+
+    await waitFor(() => {
+      expect(screen.getByText("Business hours")).toBeInTheDocument();
+      expect(screen.getByText("Past 1 hour")).toBeInTheDocument();
+    });
+
+    fireEvent.change(input, { target: { value: "biz" } });
+
+    await waitFor(() => {
+      expect(screen.getByText("Business hours")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText("Past 1 hour")).not.toBeInTheDocument();
+  });
+
+  test("omits the preset section when default and custom presets are disabled", async () => {
+    render(<TimeRangePicker includeDefaultPresets={false} presets={[]} />);
+
+    const input = screen.getByRole("textbox");
+    fireEvent.focus(input);
+
+    await waitFor(() => {
+      expect(screen.getByText("Examples")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText("Presets")).not.toBeInTheDocument();
   });
 });

@@ -6,7 +6,15 @@ import {
   getFilteredPresets,
   getPresets,
   formatPresetHint,
+  getTimeRangeDuration,
+  getTimeRangeDurationMs,
+  getTimeRangeEnd,
+  getTimeRangeStart,
+  isLiveTimeRange,
+  isStaticTimeRange,
+  pauseTimeRange,
   resolveTimeRange,
+  resolveTimeRangeToIso,
 } from "./time-range";
 import {
   startOfDay,
@@ -137,6 +145,17 @@ describe("formatRangeDisplay", () => {
     const result = formatRangeDisplay({ start, end, isLive: true }, true);
     expect(result).toContain("now");
   });
+
+  test("supports custom today labels", () => {
+    const start = new Date("2024-03-15T09:00:00");
+    const end = new Date("2024-03-15T14:30:00");
+    const result = formatRangeDisplay(
+      { start, end, isLive: false },
+      { clockFormat: "24h", labels: { today: "Today label" } },
+    );
+
+    expect(result).toContain("Today label");
+  });
 });
 
 describe("formatInputDisplay", () => {
@@ -152,6 +171,13 @@ describe("formatInputDisplay", () => {
     const end = new Date("2024-03-15T12:30:00");
     const result = formatInputDisplay({ start, end, isLive: true }, true);
     expect(result).toBe("Mar 14, 12:30 - now");
+  });
+
+  test("formats static multi-day timed ranges with date and time on both sides", () => {
+    const start = new Date("2024-03-14T09:30:00");
+    const end = new Date("2024-03-15T12:30:00");
+    const result = formatInputDisplay({ start, end, isLive: false }, true);
+    expect(result).toBe("Mar 14, 09:30 - Mar 15, 12:30");
   });
 });
 
@@ -203,6 +229,88 @@ describe("resolveTimeRange", () => {
 
     expect(result.start.getTime()).toBe(start.getTime());
     expect(result.end.getTime()).toBe(referenceDate.getTime());
+  });
+});
+
+describe("type guards and helper accessors", () => {
+  test("distinguishes static and live ranges", () => {
+    const liveRange = {
+      mode: "live" as const,
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      isLive: true,
+      liveRange: { mode: "relative" as const, duration: { value: 30, unit: "minute" as const } },
+    };
+    const staticRange = {
+      mode: "static" as const,
+      start: new Date("2024-03-15T11:30:00"),
+      end: new Date("2024-03-15T12:00:00"),
+      isLive: false,
+    };
+
+    expect(isLiveTimeRange(liveRange)).toBe(true);
+    expect(isStaticTimeRange(liveRange)).toBe(false);
+    expect(isStaticTimeRange(staticRange)).toBe(true);
+    expect(isLiveTimeRange(staticRange)).toBe(false);
+  });
+
+  test("resolves helper accessors from a live range", () => {
+    const referenceDate = createReferenceDate();
+    const range = {
+      mode: "live" as const,
+      start: subMinutes(referenceDate, 90),
+      end: referenceDate,
+      isLive: true,
+      liveRange: { mode: "relative" as const, duration: { value: 90, unit: "minute" as const } },
+    };
+
+    expect(getTimeRangeStart(range, referenceDate).getTime()).toBe(
+      subMinutes(referenceDate, 90).getTime(),
+    );
+    expect(getTimeRangeEnd(range, referenceDate).getTime()).toBe(referenceDate.getTime());
+    expect(getTimeRangeDurationMs(range, referenceDate)).toBe(90 * 60 * 1000);
+    expect(getTimeRangeDuration(range, referenceDate)).toBe("1h 30m");
+  });
+
+  test("serializes resolved live ranges to ISO", () => {
+    const referenceDate = createReferenceDate();
+    const range = {
+      mode: "live" as const,
+      start: subHours(referenceDate, 1),
+      end: referenceDate,
+      label: "Past 1 hour",
+      isLive: true,
+      liveRange: { mode: "relative" as const, duration: { value: 1, unit: "hour" as const } },
+    };
+
+    expect(resolveTimeRangeToIso(range, referenceDate)).toEqual({
+      mode: "live",
+      start: subHours(referenceDate, 1).toISOString(),
+      end: referenceDate.toISOString(),
+      label: "Past 1 hour",
+    });
+  });
+
+  test("pauses live ranges into static snapshots", () => {
+    const referenceDate = createReferenceDate();
+    const range = {
+      mode: "live" as const,
+      start: subMinutes(referenceDate, 30),
+      end: referenceDate,
+      label: "Past 30 minutes",
+      isLive: true,
+      liveRange: { mode: "relative" as const, duration: { value: 30, unit: "minute" as const } },
+    };
+
+    const paused = pauseTimeRange(range, referenceDate);
+
+    expect(paused).toEqual({
+      mode: "static",
+      start: subMinutes(referenceDate, 30),
+      end: referenceDate,
+      label: "Past 30 minutes",
+      isLive: false,
+    });
   });
 });
 
@@ -321,6 +429,14 @@ describe("parseTimeRange", () => {
       expect(result?.end.getTime()).toBe(ref.getTime());
       expect(result?.isLive).toBe(true);
     });
+
+    test("parses a custom now label", () => {
+      const result = parseTimeRange("live", ref, { labels: { now: "live" } });
+      expect(result).not.toBeNull();
+      expect(result?.label).toBe("live");
+      expect(result?.end.getTime()).toBe(ref.getTime());
+      expect(result?.isLive).toBe(true);
+    });
   });
 
   describe("ranges with now", () => {
@@ -335,6 +451,13 @@ describe("parseTimeRange", () => {
 
     test("parses date range ending with now", () => {
       const result = parseTimeRange("Mar 1 - now", ref);
+      expect(result).not.toBeNull();
+      expect(result?.isLive).toBe(true);
+      expect(result?.end.getTime()).toBe(ref.getTime());
+    });
+
+    test("parses ranges ending with a custom now label", () => {
+      const result = parseTimeRange("9am - live", ref, { labels: { now: "live" } });
       expect(result).not.toBeNull();
       expect(result?.isLive).toBe(true);
       expect(result?.end.getTime()).toBe(ref.getTime());
@@ -579,6 +702,14 @@ describe("parseTimeRange", () => {
       expect(result).not.toBeNull();
       expect(result?.label).toBe("Past 3 days");
     });
+
+    test("parses ISO date-time strings as static points in time", () => {
+      const result = parseTimeRange("2024-03-15T14:30:00.000Z");
+      expect(result).not.toBeNull();
+      expect(result?.isLive).toBe(false);
+      expect(result?.start.toISOString()).toBe("2024-03-15T14:30:00.000Z");
+      expect(result?.end.toISOString()).toBe("2024-03-15T14:30:00.000Z");
+    });
   });
 
   describe("range validation", () => {
@@ -649,6 +780,29 @@ describe("getFilteredPresets", () => {
     const lowercasePresets = getFilteredPresets("hour");
     const uppercasePresets = getFilteredPresets("HOUR");
     expect(lowercasePresets.length).toBe(uppercasePresets.length);
+  });
+
+  test("supports filtering a custom-only preset list", () => {
+    const presets = getFilteredPresets("biz", {
+      includeDefaultPresets: false,
+      presets: [
+        {
+          label: "Business hours",
+          value: "business hours",
+          shortcut: "biz",
+          getRange: (referenceDate = createReferenceDate()) => ({
+            mode: "static",
+            start: setMinutes(setHours(referenceDate, 9), 0),
+            end: setMinutes(setHours(referenceDate, 17), 0),
+            isLive: false,
+          }),
+          getHint: () => "09:00 - 17:00",
+        },
+      ],
+    });
+
+    expect(presets).toHaveLength(1);
+    expect(presets[0]?.label).toBe("Business hours");
   });
 });
 
@@ -753,6 +907,27 @@ describe("getPresets", () => {
 
     expect(presets).toHaveLength(1);
     expect(presets[0]?.label).toBe("Business hours");
+  });
+
+  test("merges custom presets with defaults by default", () => {
+    const presets = getPresets({
+      presets: [
+        {
+          label: "Business hours",
+          value: "business hours",
+          getRange: (referenceDate = createReferenceDate()) => ({
+            mode: "static",
+            start: setMinutes(setHours(referenceDate, 9), 0),
+            end: setMinutes(setHours(referenceDate, 17), 0),
+            isLive: false,
+          }),
+          getHint: () => "09:00 - 17:00",
+        },
+      ],
+    });
+
+    expect(presets.some((preset) => preset.label === "Past 1 hour")).toBe(true);
+    expect(presets.some((preset) => preset.label === "Business hours")).toBe(true);
   });
 });
 
