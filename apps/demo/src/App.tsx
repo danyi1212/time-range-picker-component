@@ -5,6 +5,7 @@ import {
   formatDuration,
   formatRangeDisplay,
   ClockFormat,
+  resolveTimeRange,
 } from "@danyi/time-range-picker";
 import { Badge, Button } from "@danyi/time-range-picker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/card";
@@ -15,6 +16,7 @@ export default function App() {
   const [selectedRange, setSelectedRange] = React.useState<TimeRange | null>(null);
   const [isDark, setIsDark] = React.useState(false);
   const [clockFormat, setClockFormat] = React.useState<ClockFormat>("24h");
+  const [liveReferenceTime, setLiveReferenceTime] = React.useState(() => new Date());
 
   React.useEffect(() => {
     const isDarkMode = document.documentElement.classList.contains("dark");
@@ -30,6 +32,36 @@ export default function App() {
   const toggleClockFormat = () => {
     setClockFormat((prev) => (prev === "24h" ? "12h" : "24h"));
   };
+
+  React.useEffect(() => {
+    if (!selectedRange?.isLive) {
+      return;
+    }
+
+    const now = new Date();
+    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    setLiveReferenceTime(now);
+
+    let intervalId: number | undefined;
+    const timeoutId = window.setTimeout(() => {
+      setLiveReferenceTime(new Date());
+      intervalId = window.setInterval(() => {
+        setLiveReferenceTime(new Date());
+      }, 60_000);
+    }, msUntilNextMinute);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (intervalId) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [selectedRange?.isLive]);
+
+  const displayRange = React.useMemo(
+    () => (selectedRange ? resolveTimeRange(selectedRange, liveReferenceTime) : null),
+    [selectedRange, liveReferenceTime],
+  );
 
   return (
     <main className="min-h-screen bg-background p-8 transition-colors">
@@ -82,20 +114,20 @@ export default function App() {
         </Card>
 
         {/* Results Display */}
-        {selectedRange && (
+        {displayRange && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarDays className="size-5" />
                 Selected Range
-                {selectedRange.isLive && (
+                {displayRange.isLive && (
                   <Badge variant="secondary" className="text-xs font-normal ml-auto">
                     Live
                   </Badge>
                 )}
               </CardTitle>
               <CardDescription>
-                {formatRangeDisplay(selectedRange, clockFormat === "24h")}
+                {formatRangeDisplay(displayRange, clockFormat === "24h")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -104,7 +136,7 @@ export default function App() {
                 <Timer className="size-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Duration:</span>
                 <Badge variant="secondary" className="font-mono">
-                  {formatDuration(selectedRange.start, selectedRange.end)}
+                  {formatDuration(displayRange.start, displayRange.end)}
                 </Badge>
               </div>
 
@@ -123,16 +155,16 @@ export default function App() {
                       Start
                     </label>
                     <div className="font-mono text-sm bg-background rounded-md px-3 py-2 border">
-                      {selectedRange.start.toISOString()}
+                      {displayRange.start.toISOString()}
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      End {selectedRange.isLive && "(now)"}
+                      End {displayRange.isLive && "(now)"}
                     </label>
                     <div className="font-mono text-sm bg-background rounded-md px-3 py-2 border">
-                      {selectedRange.end.toISOString()}
+                      {displayRange.end.toISOString()}
                     </div>
                   </div>
                 </div>
@@ -147,19 +179,19 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Local Start</label>
-                    <div className="font-medium">{selectedRange.start.toLocaleString()}</div>
+                    <div className="font-medium">{displayRange.start.toLocaleString()}</div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Local End</label>
-                    <div className="font-medium">{selectedRange.end.toLocaleString()}</div>
+                    <div className="font-medium">{displayRange.end.toLocaleString()}</div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Unix Start (ms)</label>
-                    <div className="font-mono text-xs">{selectedRange.start.getTime()}</div>
+                    <div className="font-mono text-xs">{displayRange.start.getTime()}</div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Unix End (ms)</label>
-                    <div className="font-mono text-xs">{selectedRange.end.getTime()}</div>
+                    <div className="font-mono text-xs">{displayRange.end.getTime()}</div>
                   </div>
                 </div>
               </div>

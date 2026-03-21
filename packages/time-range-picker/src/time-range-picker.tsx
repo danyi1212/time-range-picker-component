@@ -1,9 +1,10 @@
 import * as React from "react";
-import { Clock, Calendar, ChevronRight, X } from "lucide-react";
+import { Clock, Calendar, ChevronRight, Pause, X } from "lucide-react";
 import { cn } from "./utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Popover, PopoverAnchor, PopoverContent } from "./ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
   Command,
   CommandEmpty,
@@ -17,9 +18,11 @@ import {
   parseTimeRange,
   getFilteredPresets,
   formatDuration,
+  formatInputDisplay,
   formatRangeDisplay,
   getPresets,
   ClockFormat,
+  resolveTimeRange,
 } from "./time-range";
 
 interface TimeRangePickerProps {
@@ -42,8 +45,45 @@ export function TimeRangePicker({
   const [userHasTyped, setUserHasTyped] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [liveReferenceTime, setLiveReferenceTime] = React.useState(() => new Date());
 
   const use24Hour = clockFormat === "24h";
+
+  React.useEffect(() => {
+    if (!value?.isLive) {
+      return;
+    }
+
+    const scheduleNextTick = () => {
+      const now = new Date();
+      const msUntilNextMinute =
+        (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+
+      return window.setTimeout(() => {
+        setLiveReferenceTime(new Date());
+
+        const intervalId = window.setInterval(() => {
+          setLiveReferenceTime(new Date());
+        }, 60_000);
+
+        cleanup = () => window.clearInterval(intervalId);
+      }, msUntilNextMinute);
+    };
+
+    let cleanup = () => {};
+    setLiveReferenceTime(new Date());
+    const timeoutId = scheduleNextTick();
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      cleanup();
+    };
+  }, [value?.isLive]);
+
+  const resolvedValue = React.useMemo(
+    () => (value ? resolveTimeRange(value, liveReferenceTime) : null),
+    [value, liveReferenceTime],
+  );
 
   const filteredPresets = React.useMemo(
     () => (userHasTyped ? getFilteredPresets(inputValue) : getFilteredPresets("")),
@@ -54,6 +94,11 @@ export function TimeRangePicker({
     if (!inputValue.trim()) return null;
     return parseTimeRange(inputValue);
   }, [inputValue]);
+
+  const resolvedParsedFromInput = React.useMemo(
+    () => (parsedFromInput ? resolveTimeRange(parsedFromInput, liveReferenceTime) : null),
+    [parsedFromInput, liveReferenceTime],
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -89,6 +134,23 @@ export function TimeRangePicker({
     setUserHasTyped(false);
   };
 
+  const handlePause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!value || !resolvedValue) {
+      return;
+    }
+
+    onChange?.({
+      ...value,
+      start: resolvedValue.start,
+      end: resolvedValue.end,
+      isLive: false,
+      liveRange: undefined,
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && parsedFromInput) {
       handleSelectParsed();
@@ -99,8 +161,8 @@ export function TimeRangePicker({
   };
 
   const handleFocus = (_e: React.FocusEvent<HTMLInputElement>) => {
-    if (value && !inputValue) {
-      const displayText = formatRangeDisplay(value, use24Hour);
+    if (resolvedValue && !inputValue) {
+      const displayText = formatInputDisplay(resolvedValue, use24Hour);
       setInputValue(displayText);
       setUserHasTyped(false);
       requestAnimationFrame(() => {
@@ -111,6 +173,14 @@ export function TimeRangePicker({
     }
     setOpen(true);
   };
+
+  React.useEffect(() => {
+    if (!resolvedValue || userHasTyped || document.activeElement !== inputRef.current) {
+      return;
+    }
+
+    setInputValue(formatInputDisplay(resolvedValue, use24Hour));
+  }, [resolvedValue, use24Hour, userHasTyped]);
 
   const handleBlur = (e: React.FocusEvent) => {
     // Don't close if clicking within the popover
@@ -147,35 +217,56 @@ export function TimeRangePicker({
               onKeyDown={handleKeyDown}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder={
-                value ? value.label || formatRangeDisplay(value, use24Hour) : placeholder
-              }
+              placeholder={resolvedValue ? formatInputDisplay(resolvedValue, use24Hour) : placeholder}
               className={cn(
                 "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
                 "file:border-0 file:bg-transparent file:text-sm file:font-medium",
                 "placeholder:text-muted-foreground",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 "disabled:cursor-not-allowed disabled:opacity-50",
-                "pl-9 pr-24",
+                "pl-9 pr-32",
                 value && !inputValue && "placeholder:text-foreground",
               )}
             />
             {value && (
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                 <Badge variant="secondary" className="text-xs font-normal">
-                  {formatDuration(value.start, value.end)}
+                  {resolvedValue ? formatDuration(resolvedValue.start, resolvedValue.end) : null}
                 </Badge>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-5 text-muted-foreground hover:text-foreground"
-                  onClick={handleClear}
-                  onMouseDown={(e) => e.preventDefault()}
-                  tabIndex={-1}
-                >
-                  <X className="size-3" />
-                  <span className="sr-only">Clear selection</span>
-                </Button>
+                {value.isLive && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-5 text-muted-foreground hover:text-foreground"
+                        onClick={handlePause}
+                        onMouseDown={(e) => e.preventDefault()}
+                        tabIndex={-1}
+                      >
+                        <Pause className="size-3" />
+                        <span className="sr-only">Pause live range</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Freeze this range</TooltipContent>
+                  </Tooltip>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-5 text-muted-foreground hover:text-foreground"
+                      onClick={handleClear}
+                      onMouseDown={(e) => e.preventDefault()}
+                      tabIndex={-1}
+                    >
+                      <X className="size-3" />
+                      <span className="sr-only">Clear selection</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Clear selection</TooltipContent>
+                </Tooltip>
               </div>
             )}
           </div>
@@ -195,7 +286,7 @@ export function TimeRangePicker({
           <Command shouldFilter={false}>
             <CommandList className="max-h-[320px]">
               {/* Show parsed result only when user has actively typed */}
-              {parsedFromInput && userHasTyped && (
+              {resolvedParsedFromInput && userHasTyped && (
                 <>
                   <CommandGroup heading="Parsed Result">
                     <CommandItem
@@ -206,10 +297,13 @@ export function TimeRangePicker({
                         <Calendar className="size-4 text-primary" />
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {formatRangeDisplay(parsedFromInput, use24Hour)}
+                            {formatRangeDisplay(resolvedParsedFromInput, use24Hour)}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {formatDuration(parsedFromInput.start, parsedFromInput.end)}
+                            {formatDuration(
+                              resolvedParsedFromInput.start,
+                              resolvedParsedFromInput.end,
+                            )}
                           </span>
                         </div>
                       </div>
@@ -282,10 +376,10 @@ export function TimeRangePicker({
       </Popover>
 
       {/* Preview indicator */}
-      {parsedFromInput && !value && (
+      {resolvedParsedFromInput && !value && (
         <div className="absolute right-2 top-1/2 -translate-y-1/2">
           <Badge variant="outline" className="text-xs font-normal opacity-60">
-            {formatDuration(parsedFromInput.start, parsedFromInput.end)}
+            {formatDuration(resolvedParsedFromInput.start, resolvedParsedFromInput.end)}
           </Badge>
         </div>
       )}
