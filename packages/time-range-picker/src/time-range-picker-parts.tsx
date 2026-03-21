@@ -4,12 +4,7 @@ import { cn } from "./utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandSeparator,
-} from "./ui/command";
+import { CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from "./ui/command";
 import {
   formatDuration,
   formatRangeDisplay,
@@ -65,11 +60,11 @@ export function PickerInput({
   const shiftBackwardLabel =
     typeof controlLabels?.shiftBackward === "function"
       ? controlLabels.shiftBackward(shiftDurationLabel)
-      : controlLabels?.shiftBackward ?? `Move back ${shiftDurationLabel}`;
+      : (controlLabels?.shiftBackward ?? `Move back ${shiftDurationLabel}`);
   const shiftForwardLabel =
     typeof controlLabels?.shiftForward === "function"
       ? controlLabels.shiftForward(shiftDurationLabel)
-      : controlLabels?.shiftForward ?? `Move forward ${shiftDurationLabel}`;
+      : (controlLabels?.shiftForward ?? `Move forward ${shiftDurationLabel}`);
   const pauseLabel = controlLabels?.pause ?? "Freeze this range";
   const cannotShiftForwardLabel = controlLabels?.cannotShiftForward ?? "Cannot go past now";
 

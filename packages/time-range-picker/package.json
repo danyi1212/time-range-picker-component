@@ -2,6 +2,16 @@
   "name": "@danyi/time-range-picker",
   "version": "0.1.0",
   "private": false,
+  "homepage": "https://github.com/danyi1212/time-range-picker-component#readme",
+  "bugs": {
+    "url": "https://github.com/danyi1212/time-range-picker-component/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danyi1212/time-range-picker-component.git",
+    "directory": "packages/time-range-picker"
+  },
   "files": [
     "dist",
     "registry",
@@ -9,6 +19,7 @@
     "LICENSE"
   ],
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -26,6 +37,10 @@
       "import": "./dist/time-range.js"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
@@ -35,21 +50,6 @@
     "build:registry": "tsx scripts/build-registry.ts",
     "prepack": "pnpm build && pnpm build:registry"
   },
-  "sideEffects": false,
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/danyi1212/time-range-picker-component.git",
-    "directory": "packages/time-range-picker"
-  },
-  "homepage": "https://github.com/danyi1212/time-range-picker-component#readme",
-  "bugs": {
-    "url": "https://github.com/danyi1212/time-range-picker-component/issues"
-  },
-  "license": "MIT",
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.4",

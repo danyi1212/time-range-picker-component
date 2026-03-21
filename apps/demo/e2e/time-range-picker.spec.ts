@@ -42,12 +42,17 @@ async function openConfiguration(page: Page) {
 
 async function unixRange(page: Page) {
   const start = Date.parse(
-    (await page.locator('xpath=(//div[normalize-space()="Start ISO"]/following-sibling::div[1])[1]').textContent()) ??
-      "",
+    (await page
+      .locator('xpath=(//div[normalize-space()="Start ISO"]/following-sibling::div[1])[1]')
+      .textContent()) ?? "",
   );
 
-  const endLabel = page.locator('xpath=//div[normalize-space()="End ISO (now)" or normalize-space()="End ISO"]').first();
-  const end = Date.parse((await endLabel.locator("xpath=following-sibling::div[1]").textContent()) ?? "");
+  const endLabel = page
+    .locator('xpath=//div[normalize-space()="End ISO (now)" or normalize-space()="End ISO"]')
+    .first();
+  const end = Date.parse(
+    (await endLabel.locator("xpath=following-sibling::div[1]").textContent()) ?? "",
+  );
 
   return { start, end };
 }
@@ -195,14 +200,20 @@ test.describe("Time Range Picker Demo", () => {
     const input = docsInput(page);
 
     await input.click();
-    await page.getByRole("button", { name: /Past 1 hour/ }).first().click();
+    await page
+      .getByRole("button", { name: /Past 1 hour/ })
+      .first()
+      .click();
 
     await expect(page.locator("[data-slot=badge]").filter({ hasText: "1h" }).first()).toBeVisible();
     const firstRange = await unixRange(page);
 
     await input.click();
     await expect(pickerList(page).getByText("Presets", { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: /Past 3 hours/ }).first().click();
+    await page
+      .getByRole("button", { name: /Past 3 hours/ })
+      .first()
+      .click();
 
     await expect(page.locator("[data-slot=badge]").filter({ hasText: "3h" }).first()).toBeVisible();
     await expect(page.locator("[data-slot=badge]").filter({ hasText: "1h" })).toHaveCount(0);
@@ -319,7 +330,9 @@ test.describe("Time Range Picker Demo", () => {
     await expect(page.getByRole("button", { name: /pause live range/i })).toHaveCount(0);
   });
 
-  test("shift controls move a live range backward and forward by its duration", async ({ page }) => {
+  test("shift controls move a live range backward and forward by its duration", async ({
+    page,
+  }) => {
     const input = docsInput(page);
     await input.click();
     await input.fill("1h");

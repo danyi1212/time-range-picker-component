@@ -273,9 +273,7 @@ function getDayLabel(date: Date, options: ResolvedTimeRangeOptions): string {
   return formatWithPattern(date, "shortDate", options);
 }
 
-function coercePresetHintOptions(
-  options?: boolean | TimeRangeOptions,
-): ResolvedTimeRangeOptions {
+function coercePresetHintOptions(options?: boolean | TimeRangeOptions): ResolvedTimeRangeOptions {
   return normalizeTimeRangeOptions(options);
 }
 
@@ -290,7 +288,9 @@ function createPreset(
 ): TimeRangePreset {
   return {
     ...definition,
-    getHint: definition.getHint ?? ((options, referenceDate) => buildPresetHint(definition.getRange(referenceDate), options)),
+    getHint:
+      definition.getHint ??
+      ((options, referenceDate) => buildPresetHint(definition.getRange(referenceDate), options)),
   };
 }
 
@@ -532,7 +532,11 @@ function getAllPresets(options?: TimeRangeOptions): TimeRangePreset[] {
   return [...defaultPresets, ...(resolvedOptions.presets ?? [])];
 }
 
-function parseShortcut(input: string, referenceDate: Date, options?: TimeRangeOptions): TimeRange | null {
+function parseShortcut(
+  input: string,
+  referenceDate: Date,
+  options?: TimeRangeOptions,
+): TimeRange | null {
   const shortcutMatch = input.match(/^(\d+)(m|min|h|hr|d|day|w|wk|mo)s?$/i);
   if (!shortcutMatch) {
     return null;
@@ -685,10 +689,7 @@ export function getTimeRangeEnd(range: TimeRange, referenceDate: Date = new Date
   return resolveTimeRange(range, referenceDate).end;
 }
 
-export function getTimeRangeDurationMs(
-  range: TimeRange,
-  referenceDate: Date = new Date(),
-): number {
+export function getTimeRangeDurationMs(range: TimeRange, referenceDate: Date = new Date()): number {
   const resolved = resolveTimeRange(range, referenceDate);
   return resolved.end.getTime() - resolved.start.getTime();
 }
@@ -808,7 +809,10 @@ export function shiftTimeRange(
   const shiftDurationMs = getShiftDurationMs(resolved);
   const directionMultiplier = direction === "backward" ? -1 : 1;
 
-  if (direction === "forward" && resolved.end.getTime() + shiftDurationMs > referenceDate.getTime()) {
+  if (
+    direction === "forward" &&
+    resolved.end.getTime() + shiftDurationMs > referenceDate.getTime()
+  ) {
     return {
       mode: "static",
       start: resolved.start,
@@ -832,9 +836,7 @@ export function formatRangeDisplay(
   const options = normalizeTimeRangeOptions(optionsOrUse24Hour);
   const mode = getRangeMode(range);
   const endLabel =
-    mode === "live"
-      ? options.labels.now
-      : formatWithPattern(range.end, "time", options);
+    mode === "live" ? options.labels.now : formatWithPattern(range.end, "time", options);
 
   if (isSameDay(range.start, range.end)) {
     return `${getDayLabel(range.start, options)}, ${formatWithPattern(
@@ -1037,7 +1039,9 @@ export function parseTimeRange(
   const result = results[0];
 
   if (result.start && result.end) {
-    const startDate = hasCertainTime(result.start) ? result.start.date() : startOfDay(result.start.date());
+    const startDate = hasCertainTime(result.start)
+      ? result.start.date()
+      : startOfDay(result.start.date());
     const endDate = hasCertainTime(result.end) ? result.end.date() : endOfDay(result.end.date());
 
     return {

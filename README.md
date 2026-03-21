@@ -73,8 +73,8 @@ export function MyComponent() {
 
 ### Package exports
 
-- `TimeRangePicker`: React component. Import from `@danyi/time-range-picker`.
-- `DEFAULT_TIME_RANGE_EXAMPLES`: built-in example prompts. Import from `@danyi/time-range-picker`.
+- `TimeRangePicker`: React component.
+- `DEFAULT_TIME_RANGE_EXAMPLES`: built-in example prompts.
 
 ### TimeRangePicker props
 
@@ -101,7 +101,7 @@ export function MyComponent() {
 ```tsx
 import { enGB } from "date-fns/locale";
 
-<TimeRangePicker locale={enGB} />
+<TimeRangePicker locale={enGB} />;
 ```
 
 ```tsx
@@ -117,31 +117,42 @@ import { enGB } from "date-fns/locale";
 
 ### Utility functions
 
-- Root export `@danyi/time-range-picker`:
-  `parseTimeRange(input, referenceDate?, options?)`
-  `resolveTimeRange(range, referenceDate?)`
-  `formatDuration(start, end, options?)`
-  `formatRangeDisplay(range, options?)`
-  `formatInputDisplay(range, options?)`
-  `formatPresetHint(range, options?)`
-  `getPresets(options?)`
-  `getFilteredPresets(input, options?)`
-- Subpath export `@danyi/time-range-picker/time-range`:
-  `resolveTimeRangeToIso(range, referenceDate?)`
-  `getTimeRangeStart(range, referenceDate?)`
-  `getTimeRangeEnd(range, referenceDate?)`
-  `getTimeRangeDurationMs(range, referenceDate?)`
-  `getTimeRangeDuration(range, referenceDate?, options?)`
-  `pauseTimeRange(range, referenceDate?)`
-  `canShiftTimeRangeForward(range, referenceDate?)`
-  `shiftTimeRange(range, direction, referenceDate?)`
-  `isLiveTimeRange(range)`
-  `isStaticTimeRange(range)`
+From `@danyi/time-range-picker`:
+
+- `parseTimeRange(input, referenceDate?, options?)`
+- `resolveTimeRange(range, referenceDate?)`
+- `formatDuration(start, end, options?)`
+- `formatRangeDisplay(range, options?)`
+- `formatInputDisplay(range, options?)`
+- `formatPresetHint(range, options?)`
+- `getPresets(options?)`
+- `getFilteredPresets(input, options?)`
+
+From `@danyi/time-range-picker/time-range`:
+
+- `resolveTimeRangeToIso(range, referenceDate?)`
+- `getTimeRangeStart(range, referenceDate?)`
+- `getTimeRangeEnd(range, referenceDate?)`
+- `getTimeRangeDurationMs(range, referenceDate?)`
+- `getTimeRangeDuration(range, referenceDate?, options?)`
+- `pauseTimeRange(range, referenceDate?)`
+- `canShiftTimeRangeForward(range, referenceDate?)`
+- `shiftTimeRange(range, direction, referenceDate?)`
+- `isLiveTimeRange(range)`
+- `isStaticTimeRange(range)`
 
 ```ts
+import { parseTimeRange } from "@danyi/time-range-picker";
+
 const range = parseTimeRange("past 3 hours", new Date(), {
   clockFormat: "24h",
 });
+```
+
+```ts
+import { shiftTimeRange } from "@danyi/time-range-picker/time-range";
+
+const previousWindow = shiftTimeRange(range, "backward");
 ```
 
 ### Exported types
