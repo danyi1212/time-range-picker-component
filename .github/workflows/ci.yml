@@ -11,9 +11,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint & Format
+  verify:
+    name: Verify (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
 
@@ -21,47 +25,25 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm lint
       - run: pnpm fmt:check
-
-  typecheck:
-    name: Type Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
       - run: pnpm typecheck
-
-  test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
       - run: pnpm test
+      - run: pnpm build:packages
+      - run: pnpm build:registry
+      - name: Pack npm tarball
+        run: pnpm --filter @danyi/time-range-picker pack --pack-destination ../../.artifacts
+      - name: Upload package artifact
+        if: matrix.node-version == 24
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: .artifacts/*.tgz
 
   e2e:
     name: E2E Tests
@@ -73,10 +55,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
 
       - name: Install Playwright browsers
         run: pnpm --filter demo exec playwright install --with-deps chromium

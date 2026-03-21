@@ -12,23 +12,60 @@ function playgroundInput(page: Page) {
     .first();
 }
 
+function generatedSnippetCard(page: Page) {
+  return page.locator('[data-slot="card"]').filter({
+    has: page
+      .locator('[data-slot="card-title"]')
+      .filter({ hasText: /^Generated snippet from the playground$/ }),
+  });
+}
+
 function docsResultHeading(page: Page) {
-  return page.locator('[data-slot="card-title"]').filter({ hasText: /^Selected Range/ });
+  return page.getByText("Selected Range", { exact: true });
+}
+
+function selectedRangeDetails(page: Page) {
+  return page.getByText("Start ISO", { exact: true });
 }
 
 function pickerList(page: Page) {
   return page.locator("[cmdk-list]").first();
 }
 
-function detailValue(page: Page, label: string) {
-  return page.locator(`xpath=(//div[normalize-space()="${label}"]/following-sibling::div[1])[1]`);
+async function openConfiguration(page: Page) {
+  const details = page.locator("details").filter({ hasText: "Configuration" }).first();
+  const summary = details.locator("summary");
+  if (!(await details.evaluate((element) => element.hasAttribute("open")))) {
+    await summary.click();
+  }
 }
 
 async function unixRange(page: Page) {
-  const start = Number(await detailValue(page, "Unix start").textContent());
-  const end = Number(await detailValue(page, "Unix end").textContent());
+  const start = Date.parse(
+    (await page.locator('xpath=(//div[normalize-space()="Start ISO"]/following-sibling::div[1])[1]').textContent()) ??
+      "",
+  );
+
+  const endLabel = page.locator('xpath=//div[normalize-space()="End ISO (now)" or normalize-space()="End ISO"]').first();
+  const end = Date.parse((await endLabel.locator("xpath=following-sibling::div[1]").textContent()) ?? "");
 
   return { start, end };
+}
+
+async function tabToDocsInput(page: Page) {
+  for (let i = 0; i < 20; i += 1) {
+    await page.keyboard.press("Tab");
+
+    const isFocused = await docsInput(page).evaluate(
+      (element) => document.activeElement === element,
+    );
+
+    if (isFocused) {
+      return;
+    }
+  }
+
+  throw new Error("Could not focus the picker input via Tab.");
 }
 
 test.describe("Time Range Picker Demo", () => {
@@ -45,7 +82,9 @@ test.describe("Time Range Picker Demo", () => {
     });
 
     await page.goto("/");
-    await expect(page.getByText("Natural Language Time Range Picker")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Natural language time range picker/i }),
+    ).toBeVisible();
     await expect(page.getByPlaceholder("Search time range...")).toBeVisible();
     expect(errors).toHaveLength(0);
     await context.close();
@@ -61,7 +100,7 @@ test.describe("Time Range Picker Demo", () => {
     await presetButton.dispatchEvent("click");
 
     await expect(docsResultHeading(page)).toBeVisible();
-    await expect(page.getByText("Start ISO")).toBeVisible();
+    await expect(page.getByText("Start ISO", { exact: true })).toBeVisible();
   });
 
   test("focusing the picker reveals presets and examples", async ({ page }) => {
@@ -74,10 +113,7 @@ test.describe("Time Range Picker Demo", () => {
   });
 
   test("tab focus opens presets on the picker input", async ({ page }) => {
-    for (let i = 0; i < 6; i += 1) {
-      await page.keyboard.press("Tab");
-    }
-
+    await tabToDocsInput(page);
     await expect(docsInput(page)).toBeFocused();
     await expect(pickerList(page).getByText("Presets", { exact: true })).toBeVisible();
     await expect(pickerList(page).getByText("Examples", { exact: true })).toBeVisible();
@@ -112,7 +148,7 @@ test.describe("Time Range Picker Demo", () => {
     await page.keyboard.press("Enter");
 
     await expect(docsResultHeading(page)).toBeVisible();
-    await expect(page.getByText("Start ISO")).toBeVisible();
+    await expect(page.getByText("Start ISO", { exact: true })).toBeVisible();
     const year = new Date().getFullYear();
     await expect(page.getByText(new RegExp(`${year}-03`)).first()).toBeVisible();
   });
@@ -136,7 +172,7 @@ test.describe("Time Range Picker Demo", () => {
     await expect(docsResultHeading(page)).toBeVisible();
 
     await page.getByRole("button", { name: /clear selection/i }).click();
-    await expect(docsResultHeading(page)).toHaveCount(0);
+    await expect(selectedRangeDetails(page)).toHaveCount(0);
   });
 
   test("refocusing a selected value reopens the presets", async ({ page }) => {
@@ -151,6 +187,29 @@ test.describe("Time Range Picker Demo", () => {
     await expect(input).toBeFocused();
     await expect(pickerList(page).getByText("Presets", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /Past 1 hour/ }).first()).toBeVisible();
+  });
+
+  test("selecting a different preset after reopening replaces the previous preset", async ({
+    page,
+  }) => {
+    const input = docsInput(page);
+
+    await input.click();
+    await page.getByRole("button", { name: /Past 1 hour/ }).first().click();
+
+    await expect(page.locator("[data-slot=badge]").filter({ hasText: "1h" }).first()).toBeVisible();
+    const firstRange = await unixRange(page);
+
+    await input.click();
+    await expect(pickerList(page).getByText("Presets", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: /Past 3 hours/ }).first().click();
+
+    await expect(page.locator("[data-slot=badge]").filter({ hasText: "3h" }).first()).toBeVisible();
+    await expect(page.locator("[data-slot=badge]").filter({ hasText: "1h" })).toHaveCount(0);
+
+    const secondRange = await unixRange(page);
+    expect(secondRange.start).toBeLessThan(firstRange.start);
+    expect(secondRange.end).toBeGreaterThanOrEqual(firstRange.end - 1000);
   });
 
   test("blur commits a parsed value without pressing Enter", async ({ page }) => {
@@ -175,7 +234,7 @@ test.describe("Time Range Picker Demo", () => {
     await page.keyboard.press("Tab");
 
     await expect(page.getByText(/could not parse/i)).not.toBeVisible();
-    await expect(docsResultHeading(page)).toHaveCount(0);
+    await expect(selectedRangeDetails(page)).toHaveCount(0);
     await expect(docsInput(page)).toHaveValue("");
   });
 
@@ -234,13 +293,14 @@ test.describe("Time Range Picker Demo", () => {
     await page.keyboard.press("Enter");
     await expect(docsResultHeading(page)).toBeVisible();
 
-    const formatToggle = page.getByRole("button", { name: /24h|12h/ });
-    await expect(formatToggle).toContainText("24h");
-    await expect(docsInput(page)).toHaveAttribute("placeholder", /14:00/);
+    await openConfiguration(page);
+    const formatSelect = page.getByLabel("Clock format");
+    await expect(formatSelect).toHaveValue("24h");
+    await expect(page.getByText("14:00 - 16:00").first()).toBeVisible();
 
-    await formatToggle.click();
-    await expect(formatToggle).toContainText("12h");
-    await expect(docsInput(page)).toHaveAttribute("placeholder", /2:00 PM/);
+    await formatSelect.selectOption("12h");
+    await expect(formatSelect).toHaveValue("12h");
+    await expect(page.getByText("2:00 PM - 4:00 PM").first()).toBeVisible();
   });
 
   test("pausing a live range freezes the selection", async ({ page }) => {
@@ -319,8 +379,6 @@ test.describe("Time Range Picker Demo", () => {
   });
 
   test("playground supports custom presets and generated snippets", async ({ page }) => {
-    await page.getByRole("button", { name: "Playground" }).click();
-
     const input = playgroundInput(page);
     await input.click();
     await input.fill("biz");
@@ -329,14 +387,17 @@ test.describe("Time Range Picker Demo", () => {
     await expect(businessHoursPreset).toBeVisible();
     await businessHoursPreset.dispatchEvent("click");
 
-    await expect(page.getByText("Start ISO")).toBeVisible();
-    await expect(playgroundInput(page)).toHaveAttribute("placeholder", /09:00|9:00 AM/);
+    await expect(page.getByText("Start ISO", { exact: true })).toBeVisible();
+    await expect(page.getByText(/09:00 - 17:00|9:00 AM - 5:00 PM/).first()).toBeVisible();
     await expect(
-      page.locator('[data-slot="card-title"]').filter({ hasText: /^Generated snippet$/ }),
+      page
+        .locator('[data-slot="card-title"]')
+        .filter({ hasText: /^Generated snippet from the playground$/ }),
     ).toBeVisible();
 
+    await openConfiguration(page);
     await page.getByLabel("Live label").fill("live");
-    await expect(page.getByText('labels={{ now: "live" }}')).toBeVisible();
+    await expect(generatedSnippetCard(page).getByText('labels={{ now: "live" }}')).toBeVisible();
   });
 
   test("responsive layout at mobile viewport", async ({ page }) => {

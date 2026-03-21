@@ -3,20 +3,27 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter demo dev",
-    "build": "pnpm --filter demo build",
+    "build": "pnpm build:packages && pnpm --filter demo build",
+    "build:packages": "pnpm --filter @danyi/time-range-picker build",
+    "build:registry": "pnpm --filter @danyi/time-range-picker build:registry",
     "lint": "oxlint .",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
     "test": "pnpm -r test",
     "test:e2e": "pnpm --filter demo test:e2e",
     "typecheck": "pnpm -r typecheck",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build:packages && pnpm build:registry && changeset publish",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.6",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
     "oxfmt": "^0.40.0",
     "oxlint": "^0.16.12",
+    "tsup": "^8.5.0",
     "typescript": "^5.7.3"
   },
   "lint-staged": {

@@ -191,27 +191,8 @@ export function useTimeRangePickerState({
   );
 
   const handleFocus = React.useCallback(() => {
-    if (resolvedValue && !inputValue) {
-      const displayText = formatInputDisplay(resolvedValue, timeRangeOptions);
-      setInputValue(displayText);
-      setUserHasTyped(false);
-      requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(displayText.length, displayText.length);
-        }
-      });
-    }
-
     setOpen(true);
-  }, [inputValue, resolvedValue, timeRangeOptions]);
-
-  React.useEffect(() => {
-    if (!resolvedValue || userHasTyped || document.activeElement !== inputRef.current) {
-      return;
-    }
-
-    setInputValue(formatInputDisplay(resolvedValue, timeRangeOptions));
-  }, [resolvedValue, timeRangeOptions, userHasTyped]);
+  }, []);
 
   const handleBlur = React.useCallback(
     (event: React.FocusEvent) => {
