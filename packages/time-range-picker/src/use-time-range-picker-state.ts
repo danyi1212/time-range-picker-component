@@ -74,8 +74,7 @@ export function useTimeRangePickerState({
   );
 
   const filteredPresets = React.useMemo(
-    () =>
-      getFilteredPresets(userHasTyped ? inputValue : "", timeRangeOptions),
+    () => getFilteredPresets(userHasTyped ? inputValue : "", timeRangeOptions),
     [inputValue, timeRangeOptions, userHasTyped],
   );
 
@@ -97,14 +96,11 @@ export function useTimeRangePickerState({
     [closePicker, onChange, resetInput],
   );
 
-  const handleInputChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setInputValue(event.target.value);
-      setUserHasTyped(true);
-      setOpen(true);
-    },
-    [],
-  );
+  const handleInputChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+    setUserHasTyped(true);
+    setOpen(true);
+  }, []);
 
   const handleInputClick = React.useCallback(() => {
     setOpen(true);
@@ -224,11 +220,7 @@ export function useTimeRangePickerState({
 
   const parsedDuration =
     resolvedParsedFromInput &&
-    formatDuration(
-      resolvedParsedFromInput.start,
-      resolvedParsedFromInput.end,
-      timeRangeOptions,
-    );
+    formatDuration(resolvedParsedFromInput.start, resolvedParsedFromInput.end, timeRangeOptions);
 
   return {
     open,

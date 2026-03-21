@@ -1,8 +1,5 @@
 export { TimeRangePicker } from "./time-range-picker";
-export type {
-  TimeRangePickerProps,
-  TimeRangePickerControlLabels,
-} from "./time-range-picker.types";
+export type { TimeRangePickerProps, TimeRangePickerControlLabels } from "./time-range-picker.types";
 export type {
   TimeRange,
   TimeRangePreset,
