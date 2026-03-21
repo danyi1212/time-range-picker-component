@@ -39,12 +39,16 @@ export function TimeRangePicker({
 }: TimeRangePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
+  const [userHasTyped, setUserHasTyped] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const use24Hour = clockFormat === "24h";
 
-  const filteredPresets = React.useMemo(() => getFilteredPresets(inputValue), [inputValue]);
+  const filteredPresets = React.useMemo(
+    () => (userHasTyped ? getFilteredPresets(inputValue) : getFilteredPresets("")),
+    [inputValue, userHasTyped],
+  );
 
   const parsedFromInput = React.useMemo(() => {
     if (!inputValue.trim()) return null;
@@ -53,6 +57,7 @@ export function TimeRangePicker({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
+    setUserHasTyped(true);
 
     if (!open) {
       setOpen(true);
@@ -63,6 +68,7 @@ export function TimeRangePicker({
     const range = preset.getRange();
     onChange?.(range);
     setInputValue("");
+    setUserHasTyped(false);
     setOpen(false);
   };
 
@@ -70,6 +76,7 @@ export function TimeRangePicker({
     if (parsedFromInput) {
       onChange?.(parsedFromInput);
       setInputValue("");
+      setUserHasTyped(false);
       setOpen(false);
     }
   };
@@ -79,6 +86,7 @@ export function TimeRangePicker({
     e.preventDefault();
     onChange?.(null);
     setInputValue("");
+    setUserHasTyped(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -91,11 +99,10 @@ export function TimeRangePicker({
   };
 
   const handleFocus = (_e: React.FocusEvent<HTMLInputElement>) => {
-    // When focusing, if there's a value, populate the input for editing
     if (value && !inputValue) {
       const displayText = formatRangeDisplay(value, use24Hour);
       setInputValue(displayText);
-      // Move cursor to end after setting value
+      setUserHasTyped(false);
       requestAnimationFrame(() => {
         if (inputRef.current) {
           inputRef.current.setSelectionRange(displayText.length, displayText.length);
@@ -119,6 +126,7 @@ export function TimeRangePicker({
           onChange?.(parsedFromInput);
         }
         setInputValue("");
+        setUserHasTyped(false);
       }
     }, 150);
   };
@@ -139,7 +147,9 @@ export function TimeRangePicker({
               onKeyDown={handleKeyDown}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder={value ? formatRangeDisplay(value, use24Hour) : placeholder}
+              placeholder={
+                value ? value.label || formatRangeDisplay(value, use24Hour) : placeholder
+              }
               className={cn(
                 "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
                 "file:border-0 file:bg-transparent file:text-sm file:font-medium",
@@ -184,8 +194,8 @@ export function TimeRangePicker({
         >
           <Command shouldFilter={false}>
             <CommandList className="max-h-[320px]">
-              {/* Show parsed result if input is valid */}
-              {parsedFromInput && (
+              {/* Show parsed result only when user has actively typed */}
+              {parsedFromInput && userHasTyped && (
                 <>
                   <CommandGroup heading="Parsed Result">
                     <CommandItem
@@ -235,8 +245,8 @@ export function TimeRangePicker({
                 </CommandGroup>
               )}
 
-              {/* Show examples when no input */}
-              {!inputValue && (
+              {/* Show examples when no user input */}
+              {!userHasTyped && (
                 <>
                   <CommandSeparator />
                   <CommandGroup heading="Examples">
@@ -256,7 +266,7 @@ export function TimeRangePicker({
               )}
 
               {/* No results */}
-              {inputValue && filteredPresets.length === 0 && !parsedFromInput && (
+              {userHasTyped && inputValue && filteredPresets.length === 0 && !parsedFromInput && (
                 <CommandEmpty>
                   <div className="text-center py-4">
                     <p className="text-sm text-muted-foreground">Could not parse "{inputValue}"</p>
