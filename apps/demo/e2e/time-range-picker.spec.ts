@@ -1,15 +1,17 @@
 import { expect, Page, test } from "@playwright/test";
 
+function playgroundCard(page: Page) {
+  return page.locator('[data-slot="card"]').filter({
+    has: page.locator('[data-slot="card-title"]').filter({ hasText: /^Playground$/ }),
+  });
+}
+
 function docsInput(page: Page) {
   return page.getByRole("textbox").first();
 }
 
 function playgroundInput(page: Page) {
-  return page
-    .locator('[data-slot="card"]')
-    .filter({ has: page.getByText("Playground", { exact: true }) })
-    .getByRole("textbox")
-    .first();
+  return playgroundCard(page).getByRole("textbox").first();
 }
 
 function generatedSnippetCard(page: Page) {
@@ -26,6 +28,13 @@ function docsResultHeading(page: Page) {
 
 function selectedRangeDetails(page: Page) {
   return page.getByText("Start ISO", { exact: true });
+}
+
+function selectedRangeSummary(page: Page) {
+  return playgroundCard(page)
+    .getByText("Selected Range", { exact: true })
+    .locator("..")
+    .locator("..");
 }
 
 function pickerList(page: Page) {
@@ -305,13 +314,22 @@ test.describe("Time Range Picker Demo", () => {
     await expect(docsResultHeading(page)).toBeVisible();
 
     await openConfiguration(page);
-    const formatSelect = page.getByLabel("Clock format");
-    await expect(formatSelect).toHaveValue("24h");
-    await expect(page.getByText("14:00 - 16:00").first()).toBeVisible();
+    const format24h = page.getByRole("radio", { name: "24h" });
+    const format12h = page.getByRole("radio", { name: "12h" });
+    await expect(format24h).toBeChecked();
+    await expect(
+      playgroundCard(page)
+        .getByText(/14:00 - 16:00/)
+        .first(),
+    ).toBeVisible();
 
-    await formatSelect.selectOption("12h");
-    await expect(formatSelect).toHaveValue("12h");
-    await expect(page.getByText("2:00 PM - 4:00 PM").first()).toBeVisible();
+    await format12h.click();
+    await expect(format12h).toBeChecked();
+    await expect(
+      playgroundCard(page)
+        .getByText(/2:00 PM - 4:00 PM/)
+        .first(),
+    ).toBeVisible();
   });
 
   test("pausing a live range freezes the selection", async ({ page }) => {
@@ -321,12 +339,20 @@ test.describe("Time Range Picker Demo", () => {
     await page.keyboard.press("Enter");
 
     await expect(docsResultHeading(page)).toBeVisible();
-    await expect(page.locator("[data-slot=badge]").filter({ hasText: "Live" })).toHaveCount(1);
+    await expect(
+      selectedRangeSummary(page)
+        .locator("[data-slot=badge]")
+        .filter({ hasText: /^Live$/ }),
+    ).toHaveCount(1);
 
     await page.getByRole("button", { name: /pause live range/i }).click();
 
     await expect(docsResultHeading(page)).toBeVisible();
-    await expect(page.locator("[data-slot=badge]").filter({ hasText: "Live" })).toHaveCount(0);
+    await expect(
+      selectedRangeSummary(page)
+        .locator("[data-slot=badge]")
+        .filter({ hasText: /^Live$/ }),
+    ).toHaveCount(0);
     await expect(page.getByRole("button", { name: /pause live range/i })).toHaveCount(0);
   });
 
@@ -349,7 +375,11 @@ test.describe("Time Range Picker Demo", () => {
 
     await backwardButton.click();
 
-    await expect(page.locator("[data-slot=badge]").filter({ hasText: "Live" })).toHaveCount(0);
+    await expect(
+      selectedRangeSummary(page)
+        .locator("[data-slot=badge]")
+        .filter({ hasText: /^Live$/ }),
+    ).toHaveCount(0);
     await expect(page.getByRole("button", { name: /pause live range/i })).toHaveCount(0);
 
     const shiftedBack = await unixRange(page);
