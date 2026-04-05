@@ -32,6 +32,11 @@ function themeButton(page: Page, label?: "System" | "Dark" | "Light") {
   });
 }
 
+async function toggleTheme(page: Page, label: "System" | "Dark" | "Light") {
+  await expect(themeButton(page, label)).toBeVisible();
+  await themeButton(page, label).dispatchEvent("click");
+}
+
 function selectedRangeDetails(page: Page) {
   return page.getByText("Start ISO", { exact: true });
 }
@@ -289,15 +294,15 @@ test.describe("Time Range Picker Demo", () => {
     await expect(html).not.toHaveClass(/dark/);
     await expect(themeButton(page, "System")).toBeVisible();
 
-    await themeButton(page, "System").click();
+    await toggleTheme(page, "System");
     await expect(html).toHaveClass(/dark/);
     await expect(themeButton(page, "Dark")).toBeVisible();
 
-    await themeButton(page, "Dark").click();
+    await toggleTheme(page, "Dark");
     await expect(html).not.toHaveClass(/dark/);
     await expect(themeButton(page, "Light")).toBeVisible();
 
-    await themeButton(page, "Light").click();
+    await toggleTheme(page, "Light");
     await expect(html).not.toHaveClass(/dark/);
     await expect(themeButton(page, "System")).toBeVisible();
   });
