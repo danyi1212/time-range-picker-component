@@ -40,12 +40,9 @@ export function useGithubStars() {
 
     async function loadGithubStars() {
       try {
-        const response = await fetch(
-          "https://api.github.com/repos/danyi1212/time-range-picker-component",
-          {
-            signal: controller.signal,
-          },
-        );
+        const response = await fetch("https://api.github.com/repos/danyi1212/time-range-picker", {
+          signal: controller.signal,
+        });
 
         if (!response.ok) {
           setGithubUnavailable(true);

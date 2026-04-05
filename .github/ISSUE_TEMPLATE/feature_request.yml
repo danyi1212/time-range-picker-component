@@ -1,0 +1,33 @@
+name: Feature Request
+description: Suggest an improvement or new capability.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the problem you are trying to solve and the behavior you want.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to do that is difficult today?
+      placeholder: I want to support...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API, UX, or behavior you would like to see.
+      placeholder: Add a prop that...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative approaches you evaluated.
+    validations:
+      required: false

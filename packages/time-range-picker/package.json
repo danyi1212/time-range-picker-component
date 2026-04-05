@@ -1,15 +1,15 @@
 {
   "name": "@danyi1212/time-range-picker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "homepage": "https://time-range-picker-component.vercel.app/",
   "bugs": {
-    "url": "https://github.com/danyi1212/time-range-picker-component/issues"
+    "url": "https://github.com/danyi1212/time-range-picker/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danyi1212/time-range-picker-component.git",
+    "url": "git+https://github.com/danyi1212/time-range-picker.git",
     "directory": "packages/time-range-picker"
   },
   "files": [

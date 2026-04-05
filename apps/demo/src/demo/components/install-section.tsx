@@ -10,10 +10,10 @@ import {
 } from "@/demo/components/shared";
 import type { PackageManager } from "@/demo/types";
 
-const repoUrl = "https://github.com/danyi1212/time-range-picker-component";
+const repoUrl = "https://github.com/danyi1212/time-range-picker";
 const npmUrl = "https://www.npmjs.com/package/@danyi1212/time-range-picker";
 const registryUrl =
-  "https://raw.githubusercontent.com/danyi1212/time-range-picker-component/main/packages/time-range-picker/registry/time-range-picker.json";
+  "https://raw.githubusercontent.com/danyi1212/time-range-picker/main/packages/time-range-picker/registry/time-range-picker.json";
 
 export function InstallSection({
   githubStars,

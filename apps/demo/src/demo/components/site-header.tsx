@@ -2,7 +2,7 @@ import { CalendarClock, Github, Monitor, Moon, Star, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ThemePreference } from "@/demo/types";
 
-const repoUrl = "https://github.com/danyi1212/time-range-picker-component";
+const repoUrl = "https://github.com/danyi1212/time-range-picker";
 
 export function SiteHeader({
   githubStars,

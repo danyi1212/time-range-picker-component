@@ -1,0 +1,57 @@
+name: Bug Report
+description: Report a reproducible problem with the package, demo, or docs.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report.
+        Please include a minimal reproduction and the package version if possible.
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      description: Which version of `@danyi1212/time-range-picker` are you using?
+      placeholder: 0.1.0
+    validations:
+      required: false
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Package
+        - Demo site
+        - shadcn registry entry
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly and include the expected behavior.
+      placeholder: The picker resolves "last week" incorrectly when...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Share steps, a minimal example, or a link to a reproduction.
+      placeholder: |
+        1. Render the picker with...
+        2. Enter...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include browser, OS, React version, and anything else relevant.
+      placeholder: macOS 15, Chrome 135, React 19.2.4
+    validations:
+      required: false

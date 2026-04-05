@@ -2,7 +2,7 @@
 
 A [shadcn/ui](https://ui.shadcn.com) component for selecting time ranges with natural language parsing. Supports shortcuts (`3h`, `7d`), presets (today, last week), date/time ranges, and free-form natural language input.
 
-![CI](https://github.com/danyi1212/time-range-picker-component/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/danyi1212/time-range-picker/actions/workflows/ci.yml/badge.svg)
 
 Live preview: https://time-range-picker-component.vercel.app/
 
@@ -22,7 +22,7 @@ Live preview: https://time-range-picker-component.vercel.app/
 ### Via shadcn registry (recommended)
 
 ```bash
-npx shadcn@latest add https://raw.githubusercontent.com/danyi1212/time-range-picker-component/main/packages/time-range-picker/registry/time-range-picker.json
+npx shadcn@latest add https://raw.githubusercontent.com/danyi1212/time-range-picker/main/packages/time-range-picker/registry/time-range-picker.json
 ```
 
 This installs the component and its dependencies (`date-fns`, `chrono-node`, `lucide-react`) and the required shadcn primitives (`popover`, `command`, `badge`, `button`).

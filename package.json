@@ -1,5 +1,5 @@
 {
-  "name": "time-range-picker-component",
+  "name": "time-range-picker",
   "private": true,
   "scripts": {
     "dev": "pnpm --filter demo dev",

@@ -123,6 +123,6 @@ And these types from `@danyi1212/time-range-picker/time-range`:
 ## Links
 
 - Live preview: https://time-range-picker-component.vercel.app/
-- Source: https://github.com/danyi1212/time-range-picker-component
+- Source: https://github.com/danyi1212/time-range-picker
 - shadcn registry entry:
-  https://raw.githubusercontent.com/danyi1212/time-range-picker-component/main/packages/time-range-picker/registry/time-range-picker.json
+  https://raw.githubusercontent.com/danyi1212/time-range-picker/main/packages/time-range-picker/registry/time-range-picker.json
