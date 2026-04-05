@@ -8,7 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
-      "@danyi/time-range-picker": path.resolve(
+      "@danyi1212/time-range-picker": path.resolve(
         __dirname,
         "../../packages/time-range-picker/src/index.ts",
       ),

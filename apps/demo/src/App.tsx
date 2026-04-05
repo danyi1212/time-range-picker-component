@@ -5,7 +5,7 @@ import {
   type ClockFormat,
   type TimeRange,
   type TimeRangePreset,
-} from "@danyi/time-range-picker";
+} from "@danyi1212/time-range-picker";
 import type { Locale } from "date-fns";
 import * as dateFnsLocales from "date-fns/locale";
 import { ApiReferenceSection } from "@/demo/components/api-reference-section";

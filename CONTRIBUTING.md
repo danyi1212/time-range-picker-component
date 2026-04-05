@@ -36,7 +36,7 @@ apps/demo/                     # Demo / showcase app
 pnpm test
 
 # Unit tests in watch mode
-pnpm --filter @danyi/time-range-picker test:watch
+pnpm --filter @danyi1212/time-range-picker test:watch
 
 # E2E tests
 pnpm test:e2e
@@ -60,7 +60,7 @@ A pre-commit hook runs `lint-staged` automatically to lint and format changed fi
 After modifying the component source, regenerate the shadcn registry JSON:
 
 ```bash
-pnpm --filter @danyi/time-range-picker build:registry
+pnpm --filter @danyi1212/time-range-picker build:registry
 ```
 
 Commit the updated `registry/time-range-picker.json` alongside your source changes.
@@ -70,7 +70,7 @@ Commit the updated `registry/time-range-picker.json` alongside your source chang
 1. Create a branch from `main`
 2. Make your changes
 3. If the package behavior changes, add a changeset: `pnpm changeset`
-4. Regenerate the registry JSON if component source changed: `pnpm --filter @danyi/time-range-picker build:registry`
+4. Regenerate the registry JSON if component source changed: `pnpm --filter @danyi1212/time-range-picker build:registry`
 5. Ensure all checks pass: `pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test && pnpm test:e2e`
 6. Open a PR against `main`
 
@@ -88,7 +88,7 @@ For any package change that should be released:
 pnpm changeset
 ```
 
-Choose the release type for `@danyi/time-range-picker` and describe the change in one short paragraph. Commit that generated file with your code changes.
+Choose the release type for `@danyi1212/time-range-picker` and describe the change in one short paragraph. Commit that generated file with your code changes.
 
 ### Maintainer flow
 
@@ -96,15 +96,15 @@ Choose the release type for `@danyi/time-range-picker` and describe the change i
 2. The `Release` GitHub Actions workflow updates or opens a release PR.
 3. Review the generated version bump and release notes.
 4. Merge the release PR.
-5. GitHub Actions publishes `@danyi/time-range-picker` to npm and creates the matching GitHub release.
+5. GitHub Actions publishes `@danyi1212/time-range-picker` to npm and creates the matching GitHub release.
 
 ### npm trusted publishing setup
 
 The release workflow is configured for npm trusted publishing with GitHub Actions OIDC, not a stored `NPM_TOKEN`.
 
-Before the automated publish can work, a maintainer must configure the trusted publisher in npm for `@danyi/time-range-picker`:
+Before the automated publish can work, a maintainer must configure the trusted publisher in npm for `@danyi1212/time-range-picker`:
 
-1. Open npm package settings for `@danyi/time-range-picker`.
+1. Open npm package settings for `@danyi1212/time-range-picker`.
 2. Add a trusted publisher for this GitHub repository and the `release.yml` workflow on the `main` branch.
 3. If npm requires an initial manual publish before trusted publishing can be attached, do that once, then enable the trusted publisher.
 

@@ -1,5 +1,5 @@
-import type { TimeRange, TimeRangePreset } from "@danyi/time-range-picker";
-import { TimeRangePicker } from "@danyi/time-range-picker";
+import type { TimeRange, TimeRangePreset } from "@danyi1212/time-range-picker";
+import { TimeRangePicker } from "@danyi1212/time-range-picker";
 import type { Locale } from "date-fns";
 import { BookOpen, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export function PlaygroundSection({
   onCustomPresetConfigsChange,
 }: {
   range: TimeRange | null;
-  resolvedRange: ReturnType<typeof import("@danyi/time-range-picker").resolveTimeRange> | null;
+  resolvedRange: ReturnType<typeof import("@danyi1212/time-range-picker").resolveTimeRange> | null;
   placeholder: string;
   clockFormat: "12h" | "24h";
   locale: Locale;

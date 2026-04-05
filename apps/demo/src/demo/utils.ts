@@ -1,4 +1,8 @@
-import type { ClockFormat, TimeRangePickerProps, TimeRangePreset } from "@danyi/time-range-picker";
+import type {
+  ClockFormat,
+  TimeRangePickerProps,
+  TimeRangePreset,
+} from "@danyi1212/time-range-picker";
 import type { CustomPresetConfig, LocaleKey, PresetSelection } from "@/demo/types";
 
 export function getPropReferenceId(name: string) {
@@ -100,7 +104,7 @@ export function buildPlaygroundSnippet({
     : "\n      examples={[]}";
 
   return `import { useState } from "react";
-import { TimeRangePicker, type TimeRange } from "@danyi/time-range-picker";
+import { TimeRangePicker, type TimeRange } from "@danyi1212/time-range-picker";
 ${localeImport}
 
 export function Example() {

@@ -1,6 +1,6 @@
 import * as React from "react";
-import { formatDuration, formatRangeDisplay, resolveTimeRange } from "@danyi/time-range-picker";
-import type { ClockFormat } from "@danyi/time-range-picker";
+import { formatDuration, formatRangeDisplay, resolveTimeRange } from "@danyi1212/time-range-picker";
+import type { ClockFormat } from "@danyi1212/time-range-picker";
 import type { Locale } from "date-fns";
 import { ArrowUpRight, Check, Code2, Timer } from "lucide-react";
 import { CodeBlock } from "@/components/code-block";

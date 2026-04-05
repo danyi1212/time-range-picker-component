@@ -1,7 +1,7 @@
 import { CodeExample, ExamplesSectionShell, SectionIntro } from "@/demo/components/shared";
 
 const basicUsageExample = `import { useState } from "react";
-import { TimeRangePicker, type TimeRange } from "@danyi/time-range-picker";
+import { TimeRangePicker, type TimeRange } from "@danyi1212/time-range-picker";
 
 export function ReportsToolbar() {
   const [range, setRange] = useState<TimeRange | null>(null);
@@ -15,7 +15,7 @@ export function ReportsToolbar() {
   );
 }`;
 
-const localeExample = `import { TimeRangePicker } from "@danyi/time-range-picker";
+const localeExample = `import { TimeRangePicker } from "@danyi1212/time-range-picker";
 import { enGB } from "date-fns/locale";
 
 <TimeRangePicker
@@ -26,7 +26,7 @@ import { enGB } from "date-fns/locale";
 />;
 `;
 
-const customPresetExample = `import { TimeRangePicker, type TimeRangePreset } from "@danyi/time-range-picker";
+const customPresetExample = `import { TimeRangePicker, type TimeRangePreset } from "@danyi1212/time-range-picker";
 
 const presets: TimeRangePreset[] = [
   {
@@ -52,7 +52,7 @@ const utilityExample = `import {
   formatDuration,
   formatRangeDisplay,
   parseTimeRange,
-} from "@danyi/time-range-picker";
+} from "@danyi1212/time-range-picker";
 import { enGB } from "date-fns/locale";
 
 const options = {

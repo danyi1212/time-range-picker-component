@@ -6,7 +6,7 @@ const packageExportDocs: ApiDocEntry[] = [
     name: "TimeRangePicker",
     type: "React component",
     description: "Main picker component.",
-    example: `import { TimeRangePicker } from "@danyi/time-range-picker";
+    example: `import { TimeRangePicker } from "@danyi1212/time-range-picker";
 
 <TimeRangePicker value={range} onChange={setRange} />`,
   },
@@ -15,7 +15,7 @@ const packageExportDocs: ApiDocEntry[] = [
     name: "DEFAULT_TIME_RANGE_EXAMPLES",
     type: "string[]",
     description: "Built-in example prompts.",
-    example: `import { DEFAULT_TIME_RANGE_EXAMPLES } from "@danyi/time-range-picker";
+    example: `import { DEFAULT_TIME_RANGE_EXAMPLES } from "@danyi1212/time-range-picker";
 
 <TimeRangePicker examples={[...DEFAULT_TIME_RANGE_EXAMPLES, "past quarter"]} />`,
   },
@@ -159,7 +159,7 @@ const utilityDocs: ApiDocEntry[] = [
     name: "parseTimeRange",
     type: "(input: string, referenceDate?: Date, options?: TimeRangeOptions) => TimeRange | null",
     description: "Parses input into a `TimeRange`.",
-    example: `import { parseTimeRange } from "@danyi/time-range-picker";
+    example: `import { parseTimeRange } from "@danyi1212/time-range-picker";
 
 const range = parseTimeRange("past 3 hours", new Date(), {
   clockFormat: "24h",
@@ -170,7 +170,7 @@ const range = parseTimeRange("past 3 hours", new Date(), {
     name: "resolveTimeRange",
     type: "(range: TimeRange, referenceDate?: Date) => ResolvedTimeRange",
     description: "Resolves live ranges against a reference time.",
-    example: `import { resolveTimeRange } from "@danyi/time-range-picker";
+    example: `import { resolveTimeRange } from "@danyi1212/time-range-picker";
 
 const resolved = resolveTimeRange(range, new Date());`,
   },
@@ -179,7 +179,7 @@ const resolved = resolveTimeRange(range, new Date());`,
     name: "resolveTimeRangeToIso",
     type: "(range: TimeRange, referenceDate?: Date) => { mode: string; start: string; end: string; label?: string }",
     description: "Resolved range as ISO strings.",
-    example: `import { resolveTimeRangeToIso } from "@danyi/time-range-picker/time-range";
+    example: `import { resolveTimeRangeToIso } from "@danyi1212/time-range-picker/time-range";
 
 const query = resolveTimeRangeToIso(range);`,
   },
@@ -188,7 +188,7 @@ const query = resolveTimeRangeToIso(range);`,
     name: "getTimeRangeStart",
     type: "(range: TimeRange, referenceDate?: Date) => Date",
     description: "Resolved start date.",
-    example: `import { getTimeRangeStart } from "@danyi/time-range-picker/time-range";
+    example: `import { getTimeRangeStart } from "@danyi1212/time-range-picker/time-range";
 
 const start = getTimeRangeStart(range, new Date());`,
   },
@@ -197,7 +197,7 @@ const start = getTimeRangeStart(range, new Date());`,
     name: "getTimeRangeEnd",
     type: "(range: TimeRange, referenceDate?: Date) => Date",
     description: "Resolved end date.",
-    example: `import { getTimeRangeEnd } from "@danyi/time-range-picker/time-range";
+    example: `import { getTimeRangeEnd } from "@danyi1212/time-range-picker/time-range";
 
 const end = getTimeRangeEnd(range, new Date());`,
   },
@@ -206,7 +206,7 @@ const end = getTimeRangeEnd(range, new Date());`,
     name: "getTimeRangeDurationMs",
     type: "(range: TimeRange, referenceDate?: Date) => number",
     description: "Resolved duration in milliseconds.",
-    example: `import { getTimeRangeDurationMs } from "@danyi/time-range-picker/time-range";
+    example: `import { getTimeRangeDurationMs } from "@danyi1212/time-range-picker/time-range";
 
 const durationMs = getTimeRangeDurationMs(range, new Date());`,
   },
@@ -215,7 +215,7 @@ const durationMs = getTimeRangeDurationMs(range, new Date());`,
     name: "formatDuration",
     type: "(start: Date, end: Date, options?: boolean | TimeRangeOptions) => string",
     description: "Formats a compact duration.",
-    example: `import { formatDuration } from "@danyi/time-range-picker";
+    example: `import { formatDuration } from "@danyi1212/time-range-picker";
 
 const label = formatDuration(range.start, range.end, { clockFormat: "24h" });`,
   },
@@ -224,7 +224,7 @@ const label = formatDuration(range.start, range.end, { clockFormat: "24h" });`,
     name: "getTimeRangeDuration",
     type: "(range: TimeRange, referenceDate?: Date, options?: boolean | TimeRangeOptions) => string",
     description: "Resolves then formats duration.",
-    example: `import { getTimeRangeDuration } from "@danyi/time-range-picker/time-range";
+    example: `import { getTimeRangeDuration } from "@danyi1212/time-range-picker/time-range";
 
 const label = getTimeRangeDuration(range, new Date(), { clockFormat: "24h" });`,
   },
@@ -233,7 +233,7 @@ const label = getTimeRangeDuration(range, new Date(), { clockFormat: "24h" });`,
     name: "formatRangeDisplay",
     type: "(range: ResolvedTimeRange | TimeRange, options?: boolean | TimeRangeOptions) => string",
     description: "Formats a range for display.",
-    example: `import { formatRangeDisplay, resolveTimeRange } from "@danyi/time-range-picker";
+    example: `import { formatRangeDisplay, resolveTimeRange } from "@danyi1212/time-range-picker";
 
 const text = formatRangeDisplay(resolveTimeRange(range), options);`,
   },
@@ -242,7 +242,7 @@ const text = formatRangeDisplay(resolveTimeRange(range), options);`,
     name: "formatInputDisplay",
     type: "(range: ResolvedTimeRange | TimeRange, options?: boolean | TimeRangeOptions) => string",
     description: "Formats a range for an input field.",
-    example: `import { formatInputDisplay } from "@danyi/time-range-picker";
+    example: `import { formatInputDisplay } from "@danyi1212/time-range-picker";
 
 const text = formatInputDisplay(range, { clockFormat: "24h" });`,
   },
@@ -251,7 +251,7 @@ const text = formatInputDisplay(range, { clockFormat: "24h" });`,
     name: "formatPresetHint",
     type: "(range: ResolvedTimeRange | TimeRange, options?: boolean | TimeRangeOptions) => string",
     description: "Formats preset hint text.",
-    example: `import { formatPresetHint } from "@danyi/time-range-picker";
+    example: `import { formatPresetHint } from "@danyi1212/time-range-picker";
 
 const hint = formatPresetHint(range, { clockFormat: "24h" });`,
   },
@@ -260,7 +260,7 @@ const hint = formatPresetHint(range, { clockFormat: "24h" });`,
     name: "getPresets",
     type: "(options?: TimeRangeOptions) => TimeRangePreset[]",
     description: "Returns the merged preset list.",
-    example: `import { getPresets } from "@danyi/time-range-picker";
+    example: `import { getPresets } from "@danyi1212/time-range-picker";
 
 const presets = getPresets({ includeDefaultPresets: false, presets: customPresets });`,
   },
@@ -269,7 +269,7 @@ const presets = getPresets({ includeDefaultPresets: false, presets: customPreset
     name: "getFilteredPresets",
     type: "(input: string, options?: TimeRangeOptions) => TimeRangePreset[]",
     description: "Filters presets by input.",
-    example: `import { getFilteredPresets } from "@danyi/time-range-picker";
+    example: `import { getFilteredPresets } from "@danyi1212/time-range-picker";
 
 const matches = getFilteredPresets("last", { presets: customPresets });`,
   },
@@ -278,7 +278,7 @@ const matches = getFilteredPresets("last", { presets: customPresets });`,
     name: "pauseTimeRange",
     type: "(range: TimeRange, referenceDate?: Date) => StaticTimeRange",
     description: "Freezes a live range into a static range.",
-    example: `import { pauseTimeRange } from "@danyi/time-range-picker/time-range";
+    example: `import { pauseTimeRange } from "@danyi1212/time-range-picker/time-range";
 
 const paused = pauseTimeRange(range, new Date());`,
   },
@@ -287,7 +287,7 @@ const paused = pauseTimeRange(range, new Date());`,
     name: "canShiftTimeRangeForward",
     type: "(range: TimeRange, referenceDate?: Date) => boolean",
     description: "Checks whether a forward shift is allowed.",
-    example: `import { canShiftTimeRangeForward } from "@danyi/time-range-picker/time-range";
+    example: `import { canShiftTimeRangeForward } from "@danyi1212/time-range-picker/time-range";
 
 const canGoForward = canShiftTimeRangeForward(range, new Date());`,
   },
@@ -296,7 +296,7 @@ const canGoForward = canShiftTimeRangeForward(range, new Date());`,
     name: "shiftTimeRange",
     type: '(range: TimeRange, direction: "backward" | "forward", referenceDate?: Date) => StaticTimeRange',
     description: "Shifts a range by its current duration.",
-    example: `import { shiftTimeRange } from "@danyi/time-range-picker/time-range";
+    example: `import { shiftTimeRange } from "@danyi1212/time-range-picker/time-range";
 
 const previousWindow = shiftTimeRange(range, "backward");`,
   },
@@ -305,7 +305,7 @@ const previousWindow = shiftTimeRange(range, "backward");`,
     name: "isLiveTimeRange",
     type: "(range: TimeRange) => range is LiveTimeRange",
     description: "Type guard for live ranges.",
-    example: `import { isLiveTimeRange } from "@danyi/time-range-picker/time-range";
+    example: `import { isLiveTimeRange } from "@danyi1212/time-range-picker/time-range";
 
 if (isLiveTimeRange(range)) {
   console.log(range.duration.value, range.duration.unit);
@@ -316,7 +316,7 @@ if (isLiveTimeRange(range)) {
     name: "isStaticTimeRange",
     type: "(range: TimeRange) => range is StaticTimeRange",
     description: "Type guard for static ranges.",
-    example: `import { isStaticTimeRange } from "@danyi/time-range-picker/time-range";
+    example: `import { isStaticTimeRange } from "@danyi1212/time-range-picker/time-range";
 
 if (isStaticTimeRange(range)) {
   console.log(range.start, range.end);

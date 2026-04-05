@@ -11,7 +11,7 @@ import {
 import type { PackageManager } from "@/demo/types";
 
 const repoUrl = "https://github.com/danyi1212/time-range-picker-component";
-const npmUrl = "https://www.npmjs.com/package/@danyi/time-range-picker";
+const npmUrl = "https://www.npmjs.com/package/@danyi1212/time-range-picker";
 const registryUrl =
   "https://raw.githubusercontent.com/danyi1212/time-range-picker-component/main/packages/time-range-picker/registry/time-range-picker.json";
 
@@ -29,22 +29,22 @@ export function InstallSection({
   const installCommands = {
     npm: {
       registry: `npx shadcn@latest add ${registryUrl}`,
-      package: "npm install @danyi/time-range-picker date-fns chrono-node lucide-react",
+      package: "npm install @danyi1212/time-range-picker date-fns chrono-node lucide-react",
       primitives: "npx shadcn@latest add popover command badge button",
     },
     pnpm: {
       registry: `pnpm dlx shadcn@latest add ${registryUrl}`,
-      package: "pnpm add @danyi/time-range-picker date-fns chrono-node lucide-react",
+      package: "pnpm add @danyi1212/time-range-picker date-fns chrono-node lucide-react",
       primitives: "pnpm dlx shadcn@latest add popover command badge button",
     },
     yarn: {
       registry: `yarn dlx shadcn@latest add ${registryUrl}`,
-      package: "yarn add @danyi/time-range-picker date-fns chrono-node lucide-react",
+      package: "yarn add @danyi1212/time-range-picker date-fns chrono-node lucide-react",
       primitives: "yarn dlx shadcn@latest add popover command badge button",
     },
     bun: {
       registry: `bunx shadcn@latest add ${registryUrl}`,
-      package: "bun add @danyi/time-range-picker date-fns chrono-node lucide-react",
+      package: "bun add @danyi1212/time-range-picker date-fns chrono-node lucide-react",
       primitives: "bunx shadcn@latest add popover command badge button",
     },
   }[packageManager];

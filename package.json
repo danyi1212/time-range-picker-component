@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "pnpm --filter demo dev",
     "build": "pnpm build:packages && pnpm --filter demo build",
-    "build:packages": "pnpm --filter @danyi/time-range-picker build",
-    "build:registry": "pnpm --filter @danyi/time-range-picker build:registry",
+    "build:packages": "pnpm --filter @danyi1212/time-range-picker build",
+    "build:registry": "pnpm --filter @danyi1212/time-range-picker build:registry",
     "lint": "oxlint .",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
@@ -22,7 +22,7 @@
     "@changesets/cli": "^2.29.6",
     "@oxfmt/binding-darwin-arm64": "0.40.0",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.2",
+    "lint-staged": "^16.4.0",
     "oxfmt": "^0.40.0",
     "oxlint": "^0.16.12",
     "tsup": "^8.5.0",
@@ -37,5 +37,11 @@
       "oxfmt"
     ]
   },
-  "packageManager": "pnpm@10.11.0"
+  "packageManager": "pnpm@10.11.0",
+  "pnpm": {
+    "overrides": {
+      "picomatch@2.3.1": "2.3.2",
+      "picomatch@4.0.3": "4.0.4"
+    }
+  }
 }

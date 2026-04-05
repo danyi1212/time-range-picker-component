@@ -117,7 +117,7 @@ import { enGB } from "date-fns/locale";
 
 ### Utility functions
 
-From `@danyi/time-range-picker`:
+From `@danyi1212/time-range-picker`:
 
 - `parseTimeRange(input, referenceDate?, options?)`
 - `resolveTimeRange(range, referenceDate?)`
@@ -128,7 +128,7 @@ From `@danyi/time-range-picker`:
 - `getPresets(options?)`
 - `getFilteredPresets(input, options?)`
 
-From `@danyi/time-range-picker/time-range`:
+From `@danyi1212/time-range-picker/time-range`:
 
 - `resolveTimeRangeToIso(range, referenceDate?)`
 - `getTimeRangeStart(range, referenceDate?)`
@@ -142,7 +142,7 @@ From `@danyi/time-range-picker/time-range`:
 - `isStaticTimeRange(range)`
 
 ```ts
-import { parseTimeRange } from "@danyi/time-range-picker";
+import { parseTimeRange } from "@danyi1212/time-range-picker";
 
 const range = parseTimeRange("past 3 hours", new Date(), {
   clockFormat: "24h",
@@ -150,7 +150,7 @@ const range = parseTimeRange("past 3 hours", new Date(), {
 ```
 
 ```ts
-import { shiftTimeRange } from "@danyi/time-range-picker/time-range";
+import { shiftTimeRange } from "@danyi1212/time-range-picker/time-range";
 
 const previousWindow = shiftTimeRange(range, "backward");
 ```
@@ -159,7 +159,7 @@ const previousWindow = shiftTimeRange(range, "backward");
 
 - Root package:
   `TimeRangePickerProps`, `TimeRangePickerControlLabels`, `TimeRange`, `TimeRangePreset`, `ClockFormat`, `RelativeDuration`, `RelativeDurationUnit`, `TimeRangeOptions`, `TimeRangeLabels`, `TimeRangeFormatPatterns`
-- `@danyi/time-range-picker/time-range`:
+- `@danyi1212/time-range-picker/time-range`:
   `LiveRangeDetails`, `StaticTimeRange`, `LiveTimeRange`, `ResolvedTimeRange`
 
 ## Development
@@ -202,7 +202,7 @@ pnpm fmt
 pnpm fmt:check
 
 # Build the shadcn registry JSON
-pnpm --filter @danyi/time-range-picker build:registry
+pnpm --filter @danyi1212/time-range-picker build:registry
 ```
 
 ## Release Workflow
@@ -217,7 +217,7 @@ pnpm changeset
 pnpm version-packages
 ```
 
-When a changeset lands on `main`, GitHub Actions opens or updates a release PR. Merging that PR publishes `@danyi/time-range-picker` to npm with provenance enabled and creates the matching GitHub release.
+When a changeset lands on `main`, GitHub Actions opens or updates a release PR. Merging that PR publishes `@danyi1212/time-range-picker` to npm with provenance enabled and creates the matching GitHub release.
 
 ## Deployment Targets
 
