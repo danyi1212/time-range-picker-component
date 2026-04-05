@@ -4,6 +4,8 @@ A [shadcn/ui](https://ui.shadcn.com) component for selecting time ranges with na
 
 ![CI](https://github.com/danyi1212/time-range-picker-component/actions/workflows/ci.yml/badge.svg)
 
+Live preview: https://time-range-picker-component.vercel.app/
+
 ## Features
 
 - Natural language parsing — type "past 3 hours", "last friday", or "Mar 1 - Mar 15"

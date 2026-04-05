@@ -3,6 +3,8 @@
 A React time range picker with natural language parsing, preset ranges, and
 utility helpers for working with relative and absolute ranges.
 
+Live preview: https://time-range-picker-component.vercel.app/
+
 ## Features
 
 - Natural language parsing for inputs like `past 3 hours`, `last friday`, or
@@ -120,6 +122,7 @@ And these types from `@danyi1212/time-range-picker/time-range`:
 
 ## Links
 
-- Demo and source: https://github.com/danyi1212/time-range-picker-component
+- Live preview: https://time-range-picker-component.vercel.app/
+- Source: https://github.com/danyi1212/time-range-picker-component
 - shadcn registry entry:
   https://raw.githubusercontent.com/danyi1212/time-range-picker-component/main/packages/time-range-picker/registry/time-range-picker.json

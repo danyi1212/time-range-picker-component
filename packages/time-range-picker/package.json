@@ -2,7 +2,7 @@
   "name": "@danyi1212/time-range-picker",
   "version": "0.1.0",
   "private": false,
-  "homepage": "https://github.com/danyi1212/time-range-picker-component#readme",
+  "homepage": "https://time-range-picker-component.vercel.app/",
   "bugs": {
     "url": "https://github.com/danyi1212/time-range-picker-component/issues"
   },
