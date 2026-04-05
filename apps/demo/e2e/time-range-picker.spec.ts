@@ -244,7 +244,9 @@ test.describe("Time Range Picker Demo", () => {
     await input.fill("3h");
     await expect(page.getByText("Parsed Result")).toBeVisible();
 
-    await page.getByRole("heading", { name: /natural language time range picker/i }).click();
+    await input.evaluate((element) => {
+      element.blur();
+    });
 
     await expect(docsResultHeading(page)).toBeVisible();
     await expect(docsInput(page)).toHaveValue("");
@@ -283,20 +285,19 @@ test.describe("Time Range Picker Demo", () => {
     const html = page.locator("html");
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
-    const themeToggle = themeButton(page);
 
     await expect(html).not.toHaveClass(/dark/);
     await expect(themeButton(page, "System")).toBeVisible();
 
-    await themeToggle.click();
+    await themeButton(page, "System").click();
     await expect(html).toHaveClass(/dark/);
     await expect(themeButton(page, "Dark")).toBeVisible();
 
-    await themeToggle.click();
+    await themeButton(page, "Dark").click();
     await expect(html).not.toHaveClass(/dark/);
     await expect(themeButton(page, "Light")).toBeVisible();
 
-    await themeToggle.click();
+    await themeButton(page, "Light").click();
     await expect(html).not.toHaveClass(/dark/);
     await expect(themeButton(page, "System")).toBeVisible();
   });
