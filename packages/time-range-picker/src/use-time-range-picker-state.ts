@@ -197,16 +197,14 @@ export function useTimeRangePickerState({
         return;
       }
 
-      setTimeout(() => {
-        if (!containerRef.current?.contains(document.activeElement)) {
-          if (parsedFromInput && inputValue) {
-            onChange?.(parsedFromInput);
-          }
-          resetInput();
-        }
-      }, 150);
+      if (parsedFromInput && inputValue) {
+        onChange?.(parsedFromInput);
+      }
+
+      resetInput();
+      closePicker();
     },
-    [inputValue, onChange, parsedFromInput, resetInput],
+    [closePicker, inputValue, onChange, parsedFromInput, resetInput],
   );
 
   const placeholderText = resolvedValue
